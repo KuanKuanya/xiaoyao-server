@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author xiaoyao
  */
 @Slf4j
-public class XiuxianExternalServer {
+public class XiaoyaoExternalServer {
     
     /** WebSocket 端口 */
     private static final int WS_PORT = 10100;

@@ -5,7 +5,7 @@ import com.iohao.game.bolt.broker.server.BrokerServer;
 import com.iohao.game.common.kit.NetworkKit;
 import com.iohao.game.external.core.ExternalServer;
 import com.iohao.game.simple.SimpleHelper;
-import com.xiaoyao.external.server.XiuxianExternalServer;
+import com.xiaoyao.external.server.XiaoyaoExternalServer;
 import com.xiaoyao.logic.LogicServer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,14 +23,14 @@ import java.util.List;
  * @author xiaoyao
  */
 @Slf4j
-public class XiuxianApplication {
+public class XiaoyaoApplication {
     
     public static void main(String[] args) {
         // 打印启动信息
         printBanner();
         
         // 创建对外服
-        ExternalServer externalServer = XiuxianExternalServer.createExternalServer();
+        ExternalServer externalServer = XiaoyaoExternalServer.createExternalServer();
         
         // 创建逻辑服
         LogicServer logicServer = new LogicServer();
@@ -55,7 +55,7 @@ public class XiuxianApplication {
                 ╔═══════════════════════════════════════════════════════════════╗
                 ║                                                               ║
                 ║     水墨修仙：长生路 - 游戏服务器                                 ║
-                ║     Xiuxian Game Server                                       ║
+                ║     Xiaoyao Game Server                                       ║
                 ║                                                               ║
                 ║     Powered by ioGame Framework                               ║
                 ║                                                               ║
@@ -77,7 +77,7 @@ public class XiuxianApplication {
      */
     private static void printStartupInfo() {
         String localIp = NetworkKit.LOCAL_IP;
-        String wsUrl = XiuxianExternalServer.getWebSocketUrl();
+        String wsUrl = XiaoyaoExternalServer.getWebSocketUrl();
         
         String info = """
                 
