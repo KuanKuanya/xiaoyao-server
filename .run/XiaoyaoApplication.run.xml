@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="XiaoyaoApplication" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.xiaoyao.starter.XiaoyaoApplication" />
+    <module name="xiaoyao-starter" />
+    <option name="VM_PARAMETERS" value="--add-opens java.base/jdk.internal.misc=ALL-UNNAMED --enable-native-access=ALL-UNNAMED" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

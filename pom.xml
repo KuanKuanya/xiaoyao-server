@@ -50,11 +50,23 @@
 
         <!-- 测试 -->
         <junit.version>5.11.0</junit.version>
+        
+        <!-- Netty 版本 (强制升级) -->
+        <netty.version>4.2.7.Final</netty.version>
     </properties>
 
     <!-- 依赖管理 -->
     <dependencyManagement>
         <dependencies>
+            <!-- 强制统一 Netty 版本 -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>${netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            
             <!-- ==================== 项目内部模块 ==================== -->
             <dependency>
                 <groupId>com.xiaoyao</groupId>
@@ -125,6 +137,13 @@
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
                 <version>${redisson.version}</version>
+                <exclusions>
+                    <!-- 排除 Redisson 自带的 Netty (4.1.x) -->
+                    <exclusion>
+                        <groupId>io.netty</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- ==================== 工具库 ==================== -->
