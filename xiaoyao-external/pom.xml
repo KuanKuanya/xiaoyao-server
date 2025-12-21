@@ -23,10 +23,10 @@
             <artifactId>xiaoyao-common</artifactId>
         </dependency>
 
-        <!-- ioGame 核心框架 -->
+        <!-- ionet 一站式框架 -->
         <dependency>
-            <groupId>com.iohao.game</groupId>
-            <artifactId>run-one-netty</artifactId>
+            <groupId>com.iohao.net</groupId>
+            <artifactId>run-one</artifactId>
         </dependency>
 
         <!-- Redis (Session管理) -->

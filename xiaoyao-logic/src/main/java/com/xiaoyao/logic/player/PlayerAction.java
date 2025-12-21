@@ -1,8 +1,8 @@
 package com.xiaoyao.logic.player;
 
-import com.iohao.game.action.skeleton.annotation.ActionController;
-import com.iohao.game.action.skeleton.annotation.ActionMethod;
-import com.iohao.game.action.skeleton.core.flow.FlowContext;
+import com.iohao.net.framework.annotations.ActionController;
+import com.iohao.net.framework.annotations.ActionMethod;
+import com.iohao.net.framework.core.flow.FlowContext;
 import com.xiaoyao.common.cmd.PlayerCmd;
 import com.xiaoyao.common.proto.LoginReq;
 import com.xiaoyao.common.proto.LoginResp;
@@ -42,7 +42,7 @@ public class PlayerAction {
         
         // 绑定用户ID到连接
         if (resp.getPlayerId() > 0) {
-            flowContext.setUserId(resp.getPlayerId());
+            flowContext.bindingUserId(resp.getPlayerId());
             log.info("[登录成功] playerId={}, isNew={}", resp.getPlayerId(), resp.isNew());
         }
         

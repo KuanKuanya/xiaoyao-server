@@ -1,6 +1,6 @@
 package com.xiaoyao.common.error;
 
-import com.iohao.game.action.skeleton.core.exception.MsgExceptionInfo;
+import com.iohao.net.framework.core.exception.ErrorInformation;
 import lombok.Getter;
 
 /**
@@ -9,7 +9,7 @@ import lombok.Getter;
  * @author xiaoyao
  */
 @Getter
-public enum PlayerError implements ErrorCode, MsgExceptionInfo {
+public enum PlayerError implements ErrorInformation {
     
     // ==================== 02-01: 登录 ====================
     
@@ -43,10 +43,5 @@ public enum PlayerError implements ErrorCode, MsgExceptionInfo {
     PlayerError(int code, String message) {
         this.code = code;
         this.message = message;
-    }
-    
-    @Override
-    public String getMsg() {
-        return this.message;
     }
 }

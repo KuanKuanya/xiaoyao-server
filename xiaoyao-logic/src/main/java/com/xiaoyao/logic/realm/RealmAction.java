@@ -1,9 +1,9 @@
 package com.xiaoyao.logic.realm;
 
-import com.iohao.game.action.skeleton.annotation.ActionController;
-import com.iohao.game.action.skeleton.annotation.ActionMethod;
-import com.iohao.game.action.skeleton.core.exception.MsgException;
-import com.iohao.game.action.skeleton.core.flow.FlowContext;
+import com.iohao.net.framework.annotations.ActionController;
+import com.iohao.net.framework.annotations.ActionMethod;
+import com.iohao.net.framework.core.exception.MessageException;
+import com.iohao.net.framework.core.flow.FlowContext;
 import com.xiaoyao.common.cmd.RealmCmd;
 import com.xiaoyao.common.error.RealmError;
 import com.xiaoyao.common.proto.BreakthroughResp;
@@ -40,7 +40,7 @@ public class RealmAction {
         
         PlayerData playerData = playerService.getPlayerData(playerId);
         if (playerData == null) {
-            throw new MsgException(RealmError.EXP_NOT_ENOUGH);
+            throw new MessageException(RealmError.EXP_NOT_ENOUGH);
         }
         
         return realmService.cultivate(playerData);
@@ -53,13 +53,13 @@ public class RealmAction {
      * @return 突破结果
      */
     @ActionMethod(RealmCmd.breakthrough)
-    public BreakthroughResp breakthrough(FlowContext flowContext) throws MsgException {
+    public BreakthroughResp breakthrough(FlowContext flowContext) throws MessageException {
         long playerId = flowContext.getUserId();
         log.info("[突破境界] playerId={}", playerId);
         
         PlayerData playerData = playerService.getPlayerData(playerId);
         if (playerData == null) {
-            throw new MsgException(RealmError.EXP_NOT_ENOUGH);
+            throw new MessageException(RealmError.EXP_NOT_ENOUGH);
         }
         
         return realmService.breakthrough(playerData);

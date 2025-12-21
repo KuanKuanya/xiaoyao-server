@@ -1,6 +1,6 @@
 package com.xiaoyao.common.error;
 
-import com.iohao.game.action.skeleton.core.exception.MsgExceptionInfo;
+import com.iohao.net.framework.core.exception.ErrorInformation;
 import lombok.Getter;
 
 /**
@@ -9,7 +9,7 @@ import lombok.Getter;
  * @author xiaoyao
  */
 @Getter
-public enum RealmError implements ErrorCode, MsgExceptionInfo {
+public enum RealmError implements ErrorInformation {
     
     // ==================== 11-01: 修炼 ====================
     
@@ -43,10 +43,5 @@ public enum RealmError implements ErrorCode, MsgExceptionInfo {
     RealmError(int code, String message) {
         this.code = code;
         this.message = message;
-    }
-    
-    @Override
-    public String getMsg() {
-        return this.message;
     }
 }

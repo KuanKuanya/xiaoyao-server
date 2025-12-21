@@ -1,23 +1,22 @@
 package com.xiaoyao.starter;
 
-import com.iohao.game.action.skeleton.core.doc.BarSkeletonDoc;
-import com.iohao.game.bolt.broker.server.BrokerServer;
-import com.iohao.game.common.kit.NetworkKit;
-import com.iohao.game.external.core.ExternalServer;
-import com.iohao.game.simple.SimpleHelper;
-import com.xiaoyao.external.server.XiaoyaoExternalServer;
-import com.xiaoyao.logic.LogicServer;
+import com.iohao.net.app.RunOne;
+import com.iohao.net.common.kit.NetworkKit;
+import com.iohao.net.external.core.config.ExternalGlobalConfig;
+import com.iohao.net.external.core.netty.ExternalMapper;
+import com.xiaoyao.logic.HallLogicServer;
+import io.aeron.Aeron;
+import io.aeron.driver.MediaDriver;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
 /**
- * 修仙游戏服务器启动入口
+ * 逍遥游服务器启动入口
  * <p>
  * 启动模式：多服单进程 (开发模式)
  * - 对外服 (WebSocket)
  * - 逻辑服
- * - Broker (游戏网关)
  * </p>
  *
  * @author xiaoyao
@@ -29,21 +28,31 @@ public class XiaoyaoApplication {
         // 打印启动信息
         printBanner();
         
-        // 创建对外服
-        ExternalServer externalServer = XiaoyaoExternalServer.createExternalServer();
+        // 创建对外服 (WebSocket 端口 10100)
+        int port = ExternalGlobalConfig.externalPort;
+        var externalServer = ExternalMapper.builder(port).build();
         
-        // 创建逻辑服
-        LogicServer logicServer = new LogicServer();
+        // 创建嵌入式 Aeron MediaDriver
+        var mediaDriverCtx = new MediaDriver.Context()
+                .dirDeleteOnStart(true)
+                .dirDeleteOnShutdown(true);
+        var mediaDriver = MediaDriver.launchEmbedded(mediaDriverCtx);
         
-        // 使用 SimpleHelper 简化启动
-        // 多服单进程：对外服、逻辑服、Broker 都在一个进程中启动
-        SimpleHelper.run(externalServer, List.of(logicServer));
+        // 创建 Aeron 连接
+        var aeronCtx = new Aeron.Context()
+                .aeronDirectoryName(mediaDriver.aeronDirectoryName());
+        var aeron = Aeron.connect(aeronCtx);
         
-        // 生成接口文档
-        generateDoc();
+        // 使用 RunOne 启动
+        new RunOne()
+                .setAeron(aeron)
+                .enableCenterServer()
+                .setExternalServer(externalServer)
+                .setLogicServerList(List.of(new HallLogicServer()))
+                .startup();
         
         // 打印启动完成信息
-        printStartupInfo();
+        printStartupInfo(port);
     }
     
     /**
@@ -54,10 +63,10 @@ public class XiaoyaoApplication {
                 
                 ╔═══════════════════════════════════════════════════════════════╗
                 ║                                                               ║
-                ║     水墨修仙：长生路 - 游戏服务器                                 ║
+                ║     逍遥游：自动悟道 - 游戏服务器                                 ║
                 ║     Xiaoyao Game Server                                       ║
                 ║                                                               ║
-                ║     Powered by ioGame Framework                               ║
+                ║     Powered by ionet Framework                                ║
                 ║                                                               ║
                 ╚═══════════════════════════════════════════════════════════════╝
                 """;
@@ -65,19 +74,11 @@ public class XiaoyaoApplication {
     }
     
     /**
-     * 生成接口文档
-     */
-    private static void generateDoc() {
-        // 开发阶段可以生成接口文档
-        // BarSkeletonDoc.me().buildDoc();
-    }
-    
-    /**
      * 打印启动完成信息
      */
-    private static void printStartupInfo() {
+    private static void printStartupInfo(int port) {
         String localIp = NetworkKit.LOCAL_IP;
-        String wsUrl = XiaoyaoExternalServer.getWebSocketUrl();
+        String wsUrl = "ws://127.0.0.1:" + port + "/websocket";
         
         String info = """
                 

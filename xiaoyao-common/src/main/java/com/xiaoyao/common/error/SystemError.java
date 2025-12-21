@@ -1,6 +1,6 @@
 package com.xiaoyao.common.error;
 
-import com.iohao.game.action.skeleton.core.exception.MsgExceptionInfo;
+import com.iohao.net.framework.core.exception.ErrorInformation;
 import lombok.Getter;
 
 /**
@@ -9,7 +9,7 @@ import lombok.Getter;
  * @author xiaoyao
  */
 @Getter
-public enum SystemError implements ErrorCode, MsgExceptionInfo {
+public enum SystemError implements ErrorInformation {
     
     /** 成功 */
     SUCCESS(0, "成功"),
@@ -52,10 +52,5 @@ public enum SystemError implements ErrorCode, MsgExceptionInfo {
     SystemError(int code, String message) {
         this.code = code;
         this.message = message;
-    }
-    
-    @Override
-    public String getMsg() {
-        return this.message;
     }
 }

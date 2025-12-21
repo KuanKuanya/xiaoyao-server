@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <name>xiaoyao-server</name>
-    <description>水墨修仙：长生路 - 游戏服务端</description>
+    <description>逍遥游：自动悟道 - 游戏服务端</description>
 
     <!-- 子模块 -->
     <modules>
@@ -21,18 +21,14 @@
     </modules>
 
     <properties>
-        <!-- Java 版本 -->
-        <java.version>21</java.version>
+        <!-- Java 版本 - ionet 要求 JDK 25 -->
+        <java.version>25</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- ionet 版本 (使用发布版本，避免 JDK 25 依赖问题) -->
-        <!-- 注意：如需使用最新特性，请升级到 JDK 25 并使用 ionet 25.x -->
-        <ioGame.version>21.19</ioGame.version>
-
-        <!-- Netty -->
-        <netty.version>4.1.115.Final</netty.version>
+        <!-- ionet 版本 -->
+        <ionet.version>25.2</ionet.version>
 
         <!-- 数据库相关 -->
         <mysql.version>8.0.33</mysql.version>
@@ -43,14 +39,14 @@
         <redisson.version>3.34.1</redisson.version>
 
         <!-- 工具库 -->
-        <lombok.version>1.18.34</lombok.version>
+        <lombok.version>1.18.42</lombok.version>
         <hutool.version>5.8.31</hutool.version>
         <guava.version>33.3.0-jre</guava.version>
         <fastjson2.version>2.0.52</fastjson2.version>
 
         <!-- 日志 -->
-        <slf4j.version>2.0.16</slf4j.version>
-        <logback.version>1.5.8</logback.version>
+        <slf4j.version>2.0.17</slf4j.version>
+        <logback.version>1.5.21</logback.version>
 
         <!-- 测试 -->
         <junit.version>5.11.0</junit.version>
@@ -76,26 +72,33 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <!-- ==================== ioGame 框架 ==================== -->
-            <!-- ioGame 核心 (包含业务框架 + 网络通信) -->
+            <!-- ==================== ionet 框架 ==================== -->
+            <!-- ionet 一站式启动 (包含 net-center, external-netty, net-logic-server) -->
             <dependency>
-                <groupId>com.iohao.game</groupId>
-                <artifactId>run-one-netty</artifactId>
-                <version>${ioGame.version}</version>
+                <groupId>com.iohao.net</groupId>
+                <artifactId>run-one</artifactId>
+                <version>${ionet.version}</version>
             </dependency>
 
-            <!-- ioGame 扩展：Protobuf 序列化 -->
+            <!-- ionet 核心框架 -->
             <dependency>
-                <groupId>com.iohao.game</groupId>
-                <artifactId>light-jprotobuf</artifactId>
-                <version>${ioGame.version}</version>
+                <groupId>com.iohao.net</groupId>
+                <artifactId>core-framework</artifactId>
+                <version>${ionet.version}</version>
             </dependency>
 
-            <!-- ioGame 扩展：领域事件 -->
+            <!-- ionet JProtobuf 扩展 -->
             <dependency>
-                <groupId>com.iohao.game</groupId>
-                <artifactId>light-domain-event</artifactId>
-                <version>${ioGame.version}</version>
+                <groupId>com.iohao.net</groupId>
+                <artifactId>extension-jprotobuf</artifactId>
+                <version>${ionet.version}</version>
+            </dependency>
+
+            <!-- ionet 领域事件扩展 -->
+            <dependency>
+                <groupId>com.iohao.net</groupId>
+                <artifactId>extension-domain-event</artifactId>
+                <version>${ionet.version}</version>
             </dependency>
 
             <!-- ==================== 数据库 ==================== -->
@@ -245,6 +248,18 @@
             <id>aliyun</id>
             <name>Aliyun Maven</name>
             <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+        <!-- ionet 可能在 Sonatype OSSRH -->
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>ossrh-snapshots</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 

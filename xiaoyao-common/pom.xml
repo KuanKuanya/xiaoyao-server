@@ -17,10 +17,16 @@
     <description>公共模块 - 路由定义、协议消息、常量、工具类</description>
 
     <dependencies>
-        <!-- ioGame Protobuf 序列化 -->
+        <!-- ionet 核心框架 -->
         <dependency>
-            <groupId>com.iohao.game</groupId>
-            <artifactId>light-jprotobuf</artifactId>
+            <groupId>com.iohao.net</groupId>
+            <artifactId>core-framework</artifactId>
+        </dependency>
+
+        <!-- ionet JProtobuf 序列化 -->
+        <dependency>
+            <groupId>com.iohao.net</groupId>
+            <artifactId>extension-jprotobuf</artifactId>
         </dependency>
 
         <!-- 工具库 -->

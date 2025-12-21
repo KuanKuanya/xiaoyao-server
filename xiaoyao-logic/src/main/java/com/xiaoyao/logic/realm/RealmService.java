@@ -1,6 +1,6 @@
 package com.xiaoyao.logic.realm;
 
-import com.iohao.game.action.skeleton.core.exception.MsgException;
+import com.iohao.net.framework.core.exception.MessageException;
 import com.xiaoyao.common.error.RealmError;
 import com.xiaoyao.common.proto.BreakthroughResp;
 import com.xiaoyao.common.proto.CultivateResp;
@@ -69,12 +69,12 @@ public class RealmService {
      * @param playerData 玩家数据
      * @return 突破结果
      */
-    public BreakthroughResp breakthrough(PlayerData playerData) throws MsgException {
+    public BreakthroughResp breakthrough(PlayerData playerData) throws MessageException {
         int currentRealmId = playerData.getRealmId();
         
         // 检查是否已达最高境界
         if (currentRealmId >= MAX_REALM) {
-            throw new MsgException(RealmError.REALM_MAX);
+            throw new MessageException(RealmError.REALM_MAX);
         }
         
         // 获取突破所需经验
@@ -82,7 +82,7 @@ public class RealmService {
         
         // 检查经验是否足够
         if (playerData.getRealmExp() < requiredExp) {
-            throw new MsgException(RealmError.EXP_NOT_FULL);
+            throw new MessageException(RealmError.EXP_NOT_FULL);
         }
         
         // 执行突破
