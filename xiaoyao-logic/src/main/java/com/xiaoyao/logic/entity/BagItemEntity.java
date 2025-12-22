@@ -11,32 +11,26 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("t_bag_item")
-public class BagItemEntity {
-    
+public class BagItemEntity extends BaseEntity {
+
     /** 自增ID */
     @TableId(type = IdType.AUTO)
     private Long id;
-    
+
     /** 玩家ID */
     private Long playerId;
-    
+
     /** 物品ID */
     private Integer itemId;
-    
+
     /** 数量 */
     private Integer count;
-    
+
     /** 槽位 */
     private Integer slot;
-    
+
     /** 是否锁定 */
     private Boolean locked;
-    
-    /** 创建时间 */
-    @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createTime;
-    
-    /** 更新时间 */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime updateTime;
+
+    // 公共字段 (version, is_deleted, created_at, updated_at等) 已由 BaseEntity 提供
 }

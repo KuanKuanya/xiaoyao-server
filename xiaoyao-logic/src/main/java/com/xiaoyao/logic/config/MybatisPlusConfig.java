@@ -3,6 +3,7 @@ package com.xiaoyao.logic.config;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
@@ -72,11 +73,13 @@ public class MybatisPlusConfig {
     }
     
     @Bean
-    public SqlSessionFactory sqlSessionFactory(DataSource dataSource, MybatisPlusInterceptor interceptor) throws Exception {
+    public SqlSessionFactory sqlSessionFactory(DataSource dataSource,
+                                               MybatisPlusInterceptor interceptor,
+                                               MetaObjectHandlerConfig metaObjectHandler) throws Exception {
         MybatisSqlSessionFactoryBean factory = new MybatisSqlSessionFactoryBean();
         factory.setDataSource(dataSource);
         factory.setPlugins(interceptor);
-        
+
         // MyBatis 配置
         MybatisConfiguration configuration = new MybatisConfiguration();
         configuration.setMapUnderscoreToCamelCase(true);
@@ -84,7 +87,22 @@ public class MybatisPlusConfig {
         // 开发环境开启 SQL 日志
         // configuration.setLogImpl(StdOutImpl.class);
         factory.setConfiguration(configuration);
-        
+
+        // 全局配置
+        GlobalConfig globalConfig = new GlobalConfig();
+        GlobalConfig.DbConfig dbConfig = new GlobalConfig.DbConfig();
+        // 逻辑删除配置
+        dbConfig.setLogicDeleteField("isDeleted");  // 实体类字段名
+        dbConfig.setLogicDeleteValue("1");          // 删除值
+        dbConfig.setLogicNotDeleteValue("0");       // 未删除值
+        globalConfig.setDbConfig(dbConfig);
+
+        // 设置字段自动填充处理器
+        globalConfig.setMetaObjectHandler(metaObjectHandler);
+
+        factory.setGlobalConfig(globalConfig);
+
+        log.info("[MyBatis-Plus] 全局配置完成 - 逻辑删除: isDeleted");
         return factory.getObject();
     }
     

@@ -11,32 +11,26 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("t_equipment")
-public class EquipmentEntity {
-    
+public class EquipmentEntity extends BaseEntity {
+
     /** 自增ID */
     @TableId(type = IdType.AUTO)
     private Long id;
-    
+
     /** 玩家ID */
     private Long playerId;
-    
+
     /** 槽位 WEAPON/ARMOR/HEAD/FEET/BELT/ARTIFACT */
     private String slot;
-    
+
     /** 物品ID */
     private Integer itemId;
-    
+
     /** 强化等级 */
     private Integer enhanceLevel;
-    
+
     /** 升星等级 */
     private Integer starLevel;
-    
-    /** 创建时间 */
-    @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createTime;
-    
-    /** 更新时间 */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime updateTime;
+
+    // 公共字段 (version, is_deleted, created_at, updated_at等) 已由 BaseEntity 提供
 }
