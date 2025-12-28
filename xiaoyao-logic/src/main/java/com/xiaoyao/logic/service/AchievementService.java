@@ -4,7 +4,7 @@ import com.xiaoyao.logic.constants.GameConstants;
 import com.xiaoyao.logic.entity.AchievementEntity;
 import com.xiaoyao.logic.exception.BusinessException;
 import com.xiaoyao.logic.exception.ErrorCode;
-import com.xiaoyao.logic.mapper.AchievementMapper;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +17,8 @@ import java.util.List;
  * 成就服务
  * 提供成就进度跟踪和奖励领取功能
  *
- * <p>扩展点说明：
+ * <p>
+ * 扩展点说明：
  * 1. 成就配置（目标进度等）应由配置管理器提供
  * 2. 实际的奖励发放应由RewardService实现
  * 3. 成就完成时可以触发回调通知其他系统
@@ -29,15 +30,15 @@ import java.util.List;
 public class AchievementService {
 
     @Resource
-    private AchievementMapper achievementMapper;
+    private com.xiaoyao.logic.repository.AchievementRepository achievementRepository;
 
     /**
      * 初始化玩家的成就记录
      * 一般在玩家首次登录或触发成就系统时调用
      *
-     * @param playerId 玩家ID
+     * @param playerId         玩家ID
      * @param achievementCfgId 成就配置ID
-     * @param targetProgress 目标进度（从配置读取）
+     * @param targetProgress   目标进度（从配置读取）
      * @return 成就实体
      */
     @Transactional(rollbackFor = Exception.class)
@@ -51,7 +52,7 @@ public class AchievementService {
         }
 
         // 检查是否已存在
-        AchievementEntity existing = achievementMapper.selectByAchievementCfgId(playerId, achievementCfgId);
+        AchievementEntity existing = achievementRepository.findByAchievementCfgId(playerId, achievementCfgId);
         if (existing != null) {
             return existing; // 已存在则直接返回
         }
@@ -64,7 +65,7 @@ public class AchievementService {
         achievement.setStatus(GameConstants.ACHIEVEMENT_STATUS_ONGOING);
         achievement.setCreatedBy(playerId);
 
-        achievementMapper.insert(achievement);
+        achievement = achievementRepository.save(achievement);
 
         log.info("[成就服务] 初始化成就 playerId={} cfgId={} id={}",
                 playerId, achievementCfgId, achievement.getId());
@@ -75,10 +76,10 @@ public class AchievementService {
     /**
      * 增加成就进度
      *
-     * @param playerId 玩家ID
+     * @param playerId         玩家ID
      * @param achievementCfgId 成就配置ID
-     * @param addProgress 增加的进度
-     * @param targetProgress 目标进度（从配置读取）
+     * @param addProgress      增加的进度
+     * @param targetProgress   目标进度（从配置读取）
      * @return 是否完成成就
      */
     @Transactional(rollbackFor = Exception.class)
@@ -105,7 +106,7 @@ public class AchievementService {
         // 检查是否完成
         boolean completed = checkAndComplete(achievement, targetProgress);
 
-        achievementMapper.updateById(achievement);
+        achievementRepository.save(achievement);
 
         log.info("[成就服务] 增加进度 playerId={} cfgId={} add={} progress={}->{} completed={}",
                 playerId, achievementCfgId, addProgress, oldProgress, newProgress, completed);
@@ -116,10 +117,10 @@ public class AchievementService {
     /**
      * 设置成就进度（绝对值）
      *
-     * @param playerId 玩家ID
+     * @param playerId         玩家ID
      * @param achievementCfgId 成就配置ID
-     * @param progress 进度值
-     * @param targetProgress 目标进度
+     * @param progress         进度值
+     * @param targetProgress   目标进度
      * @return 是否完成成就
      */
     @Transactional(rollbackFor = Exception.class)
@@ -148,7 +149,7 @@ public class AchievementService {
         // 检查是否完成
         boolean completed = checkAndComplete(achievement, targetProgress);
 
-        achievementMapper.updateById(achievement);
+        achievementRepository.save(achievement);
 
         log.info("[成就服务] 设置进度 playerId={} cfgId={} progress={}->{} completed={}",
                 playerId, achievementCfgId, oldProgress, progress, completed);
@@ -159,7 +160,7 @@ public class AchievementService {
     /**
      * 领取成就奖励
      *
-     * @param playerId 玩家ID
+     * @param playerId         玩家ID
      * @param achievementCfgId 成就配置ID
      * @throws BusinessException 成就不存在、未完成或已领取
      */
@@ -169,7 +170,7 @@ public class AchievementService {
         validateAchievementCfgId(achievementCfgId);
 
         // 查询成就记录
-        AchievementEntity achievement = achievementMapper.selectByAchievementCfgId(playerId, achievementCfgId);
+        AchievementEntity achievement = achievementRepository.findByAchievementCfgId(playerId, achievementCfgId);
         if (achievement == null) {
             throw BusinessException.of(ErrorCode.ACHIEVEMENT_NOT_FOUND,
                     "成就不存在 playerId=%d cfgId=%s", playerId, achievementCfgId);
@@ -191,7 +192,7 @@ public class AchievementService {
         achievement.setClaimTime(System.currentTimeMillis());
         achievement.setUpdatedBy(playerId);
 
-        achievementMapper.updateById(achievement);
+        achievementRepository.save(achievement);
 
         log.info("[成就服务] 领取奖励 playerId={} cfgId={} id={}",
                 playerId, achievementCfgId, achievement.getId());
@@ -208,13 +209,13 @@ public class AchievementService {
      */
     public List<AchievementEntity> getPlayerAchievements(Long playerId) {
         validatePlayerId(playerId);
-        return achievementMapper.selectByPlayerId(playerId);
+        return achievementRepository.findByPlayerId(playerId);
     }
 
     /**
      * 查询玩家指定成就
      *
-     * @param playerId 玩家ID
+     * @param playerId         玩家ID
      * @param achievementCfgId 成就配置ID
      * @return 成就实体（不存在返回null）
      */
@@ -222,7 +223,7 @@ public class AchievementService {
         validatePlayerId(playerId);
         validateAchievementCfgId(achievementCfgId);
 
-        return achievementMapper.selectByAchievementCfgId(playerId, achievementCfgId);
+        return achievementRepository.findByAchievementCfgId(playerId, achievementCfgId);
     }
 
     /**
@@ -233,7 +234,7 @@ public class AchievementService {
      */
     public List<AchievementEntity> getUnclaimedAchievements(Long playerId) {
         validatePlayerId(playerId);
-        return achievementMapper.selectUnclaimedAchievements(playerId);
+        return achievementRepository.findUnclaimedByPlayerId(playerId);
     }
 
     /**
@@ -245,10 +246,10 @@ public class AchievementService {
     public int[] getAchievementStatistics(Long playerId) {
         validatePlayerId(playerId);
 
-        Integer completedCount = achievementMapper.countCompletedByPlayerId(playerId);
-        Integer claimedCount = achievementMapper.countClaimedByPlayerId(playerId);
+        Integer completedCount = achievementRepository.countCompletedByPlayerId(playerId);
+        Integer claimedCount = achievementRepository.countClaimedByPlayerId(playerId);
 
-        return new int[]{
+        return new int[] {
                 completedCount != null ? completedCount : 0,
                 claimedCount != null ? claimedCount : 0
         };
@@ -262,7 +263,7 @@ public class AchievementService {
      */
     public boolean hasUnclaimedAchievements(Long playerId) {
         validatePlayerId(playerId);
-        List<AchievementEntity> unclaimed = achievementMapper.selectUnclaimedAchievements(playerId);
+        List<AchievementEntity> unclaimed = achievementRepository.findUnclaimedByPlayerId(playerId);
         return unclaimed != null && !unclaimed.isEmpty();
     }
 
@@ -272,7 +273,7 @@ public class AchievementService {
      * 获取或创建成就记录
      */
     private AchievementEntity getOrCreateAchievement(Long playerId, String achievementCfgId, Integer targetProgress) {
-        AchievementEntity achievement = achievementMapper.selectByAchievementCfgId(playerId, achievementCfgId);
+        AchievementEntity achievement = achievementRepository.findByAchievementCfgId(playerId, achievementCfgId);
 
         if (achievement == null) {
             achievement = initAchievement(playerId, achievementCfgId, targetProgress);
@@ -284,7 +285,7 @@ public class AchievementService {
     /**
      * 检查并完成成就
      *
-     * @param achievement 成就实体
+     * @param achievement    成就实体
      * @param targetProgress 目标进度
      * @return 是否刚刚完成
      */

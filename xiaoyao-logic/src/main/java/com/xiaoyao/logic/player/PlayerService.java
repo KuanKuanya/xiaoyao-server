@@ -6,7 +6,6 @@ import com.xiaoyao.common.proto.LoginReq;
 import com.xiaoyao.common.proto.LoginResp;
 import com.xiaoyao.common.proto.PlayerData;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author xiaoyao
  */
 @Slf4j
-@Service
 public class PlayerService {
 
     /** 玩家数据缓存 (deviceId -> PlayerData) */

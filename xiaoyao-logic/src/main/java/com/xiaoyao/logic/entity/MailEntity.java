@@ -1,6 +1,7 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.Data;
 import java.time.LocalDateTime;
 
@@ -10,11 +11,11 @@ import java.time.LocalDateTime;
  * @author xiaoyao
  */
 @Data
-@TableName("t_mail")
+@Table("t_mail")
 public class MailEntity extends BaseEntity {
 
     /** 邮件ID */
-    @TableId(type = IdType.AUTO)
+    @Id
     private Long id;
 
     /** 玩家ID */

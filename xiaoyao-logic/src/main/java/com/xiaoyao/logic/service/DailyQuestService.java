@@ -1,11 +1,10 @@
 package com.xiaoyao.logic.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xiaoyao.logic.constants.GameConstants;
 import com.xiaoyao.logic.entity.DailyQuestEntity;
 import com.xiaoyao.logic.exception.BusinessException;
 import com.xiaoyao.logic.exception.ErrorCode;
-import com.xiaoyao.logic.mapper.DailyQuestMapper;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +18,8 @@ import java.util.List;
  * 每日任务服务
  * 提供每日任务的进度跟踪和奖励领取功能
  *
- * <p>扩展点说明：
+ * <p>
+ * 扩展点说明：
  * 1. 任务配置（目标进度、奖励等）应由配置管理器提供
  * 2. 实际的奖励发放应由RewardService实现
  * 3. 任务完成时可以触发回调通知其他系统
@@ -31,14 +31,14 @@ import java.util.List;
 public class DailyQuestService {
 
     @Resource
-    private DailyQuestMapper dailyQuestMapper;
+    private com.xiaoyao.logic.repository.DailyQuestRepository dailyQuestRepository;
 
     /**
      * 初始化今日任务记录
      * 一般在玩家首次访问任务系统时调用
      *
-     * @param playerId 玩家ID
-     * @param questCfgId 任务配置ID
+     * @param playerId       玩家ID
+     * @param questCfgId     任务配置ID
      * @param targetProgress 目标进度（从配置读取）
      * @return 任务实体
      */
@@ -55,7 +55,7 @@ public class DailyQuestService {
         LocalDate today = LocalDate.now();
 
         // 检查今日任务是否已存在
-        DailyQuestEntity existing = dailyQuestMapper.selectByQuestCfgId(playerId, today, questCfgId);
+        DailyQuestEntity existing = dailyQuestRepository.findByQuestCfgId(playerId, today, questCfgId);
         if (existing != null) {
             return existing; // 已存在则直接返回
         }
@@ -70,7 +70,7 @@ public class DailyQuestService {
         quest.setStatus(GameConstants.QUEST_STATUS_ONGOING);
         quest.setCreatedBy(playerId);
 
-        dailyQuestMapper.insert(quest);
+        quest = dailyQuestRepository.save(quest);
 
         log.info("[每日任务] 初始化任务 playerId={} cfgId={} date={} id={}",
                 playerId, questCfgId, today, quest.getId());
@@ -81,9 +81,9 @@ public class DailyQuestService {
     /**
      * 增加任务进度
      *
-     * @param playerId 玩家ID
-     * @param questCfgId 任务配置ID
-     * @param addProgress 增加的进度
+     * @param playerId       玩家ID
+     * @param questCfgId     任务配置ID
+     * @param addProgress    增加的进度
      * @param targetProgress 目标进度（从配置读取）
      * @return 是否完成任务
      */
@@ -111,7 +111,7 @@ public class DailyQuestService {
         // 检查是否完成
         boolean completed = checkAndComplete(quest);
 
-        dailyQuestMapper.updateById(quest);
+        dailyQuestRepository.save(quest);
 
         log.info("[每日任务] 增加进度 playerId={} cfgId={} add={} progress={}->{} completed={}",
                 playerId, questCfgId, addProgress, oldProgress, newProgress, completed);
@@ -122,9 +122,9 @@ public class DailyQuestService {
     /**
      * 设置任务进度（绝对值）
      *
-     * @param playerId 玩家ID
-     * @param questCfgId 任务配置ID
-     * @param progress 进度值
+     * @param playerId       玩家ID
+     * @param questCfgId     任务配置ID
+     * @param progress       进度值
      * @param targetProgress 目标进度
      * @return 是否完成任务
      */
@@ -156,7 +156,7 @@ public class DailyQuestService {
         // 检查是否完成
         boolean completed = checkAndComplete(quest);
 
-        dailyQuestMapper.updateById(quest);
+        dailyQuestRepository.save(quest);
 
         log.info("[每日任务] 设置进度 playerId={} cfgId={} progress={}->{} completed={}",
                 playerId, questCfgId, oldProgress, newProgress, completed);
@@ -167,7 +167,7 @@ public class DailyQuestService {
     /**
      * 领取任务奖励
      *
-     * @param playerId 玩家ID
+     * @param playerId   玩家ID
      * @param questCfgId 任务配置ID
      * @throws BusinessException 任务不存在、未完成或已领取
      */
@@ -179,7 +179,7 @@ public class DailyQuestService {
         LocalDate today = LocalDate.now();
 
         // 查询今日任务记录
-        DailyQuestEntity quest = dailyQuestMapper.selectByQuestCfgId(playerId, today, questCfgId);
+        DailyQuestEntity quest = dailyQuestRepository.findByQuestCfgId(playerId, today, questCfgId);
         if (quest == null) {
             throw BusinessException.of(ErrorCode.QUEST_NOT_FOUND,
                     "任务不存在 playerId=%d cfgId=%s date=%s", playerId, questCfgId, today);
@@ -202,7 +202,7 @@ public class DailyQuestService {
         quest.setClaimTime(System.currentTimeMillis());
         quest.setUpdatedBy(playerId);
 
-        dailyQuestMapper.updateById(quest);
+        dailyQuestRepository.save(quest);
 
         log.info("[每日任务] 领取奖励 playerId={} cfgId={} id={}",
                 playerId, questCfgId, quest.getId());
@@ -220,13 +220,13 @@ public class DailyQuestService {
     public List<DailyQuestEntity> getTodayQuests(Long playerId) {
         validatePlayerId(playerId);
         LocalDate today = LocalDate.now();
-        return dailyQuestMapper.selectByPlayerIdAndDate(playerId, today);
+        return dailyQuestRepository.findByPlayerIdAndDate(playerId, today);
     }
 
     /**
      * 查询玩家指定日期的任务
      *
-     * @param playerId 玩家ID
+     * @param playerId  玩家ID
      * @param questDate 任务日期
      * @return 任务列表
      */
@@ -235,13 +235,13 @@ public class DailyQuestService {
         if (questDate == null) {
             throw BusinessException.of(ErrorCode.PARAM_INVALID, "任务日期不能为空");
         }
-        return dailyQuestMapper.selectByPlayerIdAndDate(playerId, questDate);
+        return dailyQuestRepository.findByPlayerIdAndDate(playerId, questDate);
     }
 
     /**
      * 查询玩家今日指定任务
      *
-     * @param playerId 玩家ID
+     * @param playerId   玩家ID
      * @param questCfgId 任务配置ID
      * @return 任务实体（不存在返回null）
      */
@@ -250,7 +250,7 @@ public class DailyQuestService {
         validateQuestCfgId(questCfgId);
 
         LocalDate today = LocalDate.now();
-        return dailyQuestMapper.selectByQuestCfgId(playerId, today, questCfgId);
+        return dailyQuestRepository.findByQuestCfgId(playerId, today, questCfgId);
     }
 
     /**
@@ -263,10 +263,10 @@ public class DailyQuestService {
         validatePlayerId(playerId);
         LocalDate today = LocalDate.now();
 
-        Integer completedCount = dailyQuestMapper.countCompletedByDate(playerId, today);
-        Integer claimedCount = dailyQuestMapper.countClaimedByDate(playerId, today);
+        Integer completedCount = dailyQuestRepository.countCompletedByDate(playerId, today);
+        Integer claimedCount = dailyQuestRepository.countClaimedByDate(playerId, today);
 
-        return new int[]{
+        return new int[] {
                 completedCount != null ? completedCount : 0,
                 claimedCount != null ? claimedCount : 0
         };
@@ -282,7 +282,7 @@ public class DailyQuestService {
         validatePlayerId(playerId);
         LocalDate today = LocalDate.now();
 
-        List<DailyQuestEntity> quests = dailyQuestMapper.selectByPlayerIdAndDate(playerId, today);
+        List<DailyQuestEntity> quests = dailyQuestRepository.findByPlayerIdAndDate(playerId, today);
         if (quests == null || quests.isEmpty()) {
             return false;
         }
@@ -305,10 +305,7 @@ public class DailyQuestService {
             throw BusinessException.of(ErrorCode.PARAM_INVALID, "清理日期不能为空");
         }
 
-        LambdaQueryWrapper<DailyQuestEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.lt(DailyQuestEntity::getQuestDate, beforeDate);
-
-        int count = dailyQuestMapper.delete(wrapper);
+        int count = (int) dailyQuestRepository.deleteByQuestDateBefore(beforeDate);
 
         log.info("[每日任务] 清理过期记录 beforeDate={} count={}", beforeDate, count);
 
@@ -322,7 +319,7 @@ public class DailyQuestService {
      */
     private DailyQuestEntity getOrCreateTodayQuest(Long playerId, String questCfgId, Integer targetProgress) {
         LocalDate today = LocalDate.now();
-        DailyQuestEntity quest = dailyQuestMapper.selectByQuestCfgId(playerId, today, questCfgId);
+        DailyQuestEntity quest = dailyQuestRepository.findByQuestCfgId(playerId, today, questCfgId);
 
         if (quest == null) {
             quest = initTodayQuest(playerId, questCfgId, targetProgress);

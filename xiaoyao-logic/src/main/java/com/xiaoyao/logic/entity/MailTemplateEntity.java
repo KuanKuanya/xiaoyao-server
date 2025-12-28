@@ -1,8 +1,7 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -16,13 +15,13 @@ import java.time.LocalDateTime;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("t_mail_template")
+@Table("t_mail_template")
 public class MailTemplateEntity extends BaseEntity {
 
     /**
      * 模板ID
      */
-    @TableId(type = IdType.AUTO)
+    @Id
     private Long id;
 
     /**

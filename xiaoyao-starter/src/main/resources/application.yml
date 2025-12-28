@@ -1,0 +1,38 @@
+# 逍遥游服务端配置
+
+# ==================== 数据库配置 ====================
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/xiaoyao_game?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+    type: com.alibaba.druid.pool.DruidDataSource
+    # Druid 连接池配置
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+
+# ==================== MyBatis-Plus 配置 ====================
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    # 开发环境开启 SQL 日志
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# ==================== Redis 配置 (单实例部署暂不使用) ====================
+# data:
+#   redis:
+#     host: 127.0.0.1
+#     port: 6379
+#     password: xiaoyao@redis123
+#     database: 0
+
+# ==================== 游戏服务配置 ====================
+game:
+  server:
+    websocket-port: 10100
+    logic-port: 10200
+

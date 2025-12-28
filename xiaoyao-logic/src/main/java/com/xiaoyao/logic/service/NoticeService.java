@@ -1,11 +1,10 @@
 package com.xiaoyao.logic.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xiaoyao.logic.constants.GameConstants;
 import com.xiaoyao.logic.entity.NoticeEntity;
 import com.xiaoyao.logic.exception.BusinessException;
 import com.xiaoyao.logic.exception.ErrorCode;
-import com.xiaoyao.logic.mapper.NoticeMapper;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,12 +26,12 @@ import java.util.stream.Collectors;
 public class NoticeService {
 
     @Resource
-    private NoticeMapper noticeMapper;
+    private com.xiaoyao.logic.repository.NoticeRepository noticeRepository;
 
     /**
      * 获取玩家当前应该看到的公告列表
      *
-     * @param platform 平台类型（wechat/douyin/ios/android）
+     * @param platform   平台类型（wechat/douyin/ios/android）
      * @param appVersion 客户端版本号
      * @return 公告列表（按优先级降序）
      */
@@ -41,8 +40,13 @@ public class NoticeService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // 查询指定平台的有效公告
-        List<NoticeEntity> notices = noticeMapper.selectActiveNoticesByPlatform(now, platform);
+        // 查询有效公告
+        List<NoticeEntity> notices = noticeRepository.findActiveNotices(now);
+
+        // 按平台筛选
+        notices = notices.stream()
+                .filter(notice -> isPlatformMatch(platform, notice.getPlatforms()))
+                .collect(Collectors.toList());
 
         // 按版本号筛选
         if (StringUtils.hasText(appVersion)) {
@@ -59,7 +63,7 @@ public class NoticeService {
     /**
      * 获取登录时应该弹窗的公告
      *
-     * @param platform 平台类型
+     * @param platform   平台类型
      * @param appVersion 客户端版本号
      * @return 弹窗公告列表
      */
@@ -69,7 +73,7 @@ public class NoticeService {
         LocalDateTime now = LocalDateTime.now();
 
         // 查询弹窗公告
-        List<NoticeEntity> popupNotices = noticeMapper.selectPopupNotices(now);
+        List<NoticeEntity> popupNotices = noticeRepository.findPopupNotices(now);
 
         // 按平台和版本号筛选
         popupNotices = popupNotices.stream()
@@ -85,7 +89,7 @@ public class NoticeService {
     /**
      * 获取强制阅读的公告
      *
-     * @param platform 平台类型
+     * @param platform   平台类型
      * @param appVersion 客户端版本号
      * @return 强制阅读公告列表
      */
@@ -95,7 +99,7 @@ public class NoticeService {
         LocalDateTime now = LocalDateTime.now();
 
         // 查询强制阅读公告
-        List<NoticeEntity> forceReadNotices = noticeMapper.selectForceReadNotices(now);
+        List<NoticeEntity> forceReadNotices = noticeRepository.findForceReadNotices(now);
 
         // 按平台和版本号筛选
         forceReadNotices = forceReadNotices.stream()
@@ -116,7 +120,7 @@ public class NoticeService {
      * @throws BusinessException 公告不存在
      */
     public NoticeEntity getNoticeById(Long noticeId) {
-        NoticeEntity notice = noticeMapper.selectById(noticeId);
+        NoticeEntity notice = noticeRepository.findById(noticeId).orElse(null);
         if (notice == null || notice.getIsDeleted() == GameConstants.DELETED_YES) {
             throw BusinessException.of(ErrorCode.NOTICE_NOT_FOUND, "公告不存在: %d", noticeId);
         }
@@ -131,14 +135,14 @@ public class NoticeService {
      */
     public List<NoticeEntity> getNoticesByType(Integer noticeType) {
         validateNoticeType(noticeType);
-        return noticeMapper.selectByType(noticeType);
+        return noticeRepository.findByType(noticeType);
     }
 
     /**
      * 创建公告（GM使用）
      *
      * @param notice 公告实体
-     * @param gmId 操作的GM ID
+     * @param gmId   操作的GM ID
      * @return 公告ID
      * @throws BusinessException 参数校验失败
      */
@@ -151,7 +155,7 @@ public class NoticeService {
         notice.setCreatedBy(gmId);
 
         // 插入数据库
-        noticeMapper.insert(notice);
+        notice = noticeRepository.save(notice);
 
         log.info("[公告服务] 创建公告 id={} type={} title={} gmId={}",
                 notice.getId(), notice.getNoticeType(), notice.getTitle(), gmId);
@@ -163,7 +167,7 @@ public class NoticeService {
      * 更新公告（GM使用）
      *
      * @param notice 公告实体
-     * @param gmId 操作的GM ID
+     * @param gmId   操作的GM ID
      * @throws BusinessException 公告不存在或参数校验失败
      */
     @Transactional(rollbackFor = Exception.class)
@@ -178,7 +182,7 @@ public class NoticeService {
         notice.setUpdatedBy(gmId);
 
         // 更新数据库
-        noticeMapper.updateById(notice);
+        noticeRepository.save(notice);
 
         log.info("[公告服务] 更新公告 id={} title={} gmId={}",
                 notice.getId(), notice.getTitle(), gmId);
@@ -188,7 +192,7 @@ public class NoticeService {
      * 删除公告（逻辑删除，GM使用）
      *
      * @param noticeId 公告ID
-     * @param gmId 操作的GM ID
+     * @param gmId     操作的GM ID
      * @throws BusinessException 公告不存在
      */
     @Transactional(rollbackFor = Exception.class)
@@ -202,7 +206,7 @@ public class NoticeService {
         notice.setDeletedAt(LocalDateTime.now());
 
         // 更新数据库
-        noticeMapper.updateById(notice);
+        noticeRepository.save(notice);
 
         log.info("[公告服务] 删除公告 id={} gmId={}", noticeId, gmId);
     }
@@ -214,16 +218,11 @@ public class NoticeService {
      * @return 公告列表
      */
     public List<NoticeEntity> getAllNotices(boolean includeDeleted) {
-        LambdaQueryWrapper<NoticeEntity> wrapper = new LambdaQueryWrapper<>();
-
         if (!includeDeleted) {
-            wrapper.eq(NoticeEntity::getIsDeleted, GameConstants.DELETED_NO);
+            return noticeRepository.findByIsDeletedOrderByPriorityDescCreatedAtDesc(GameConstants.DELETED_NO);
         }
 
-        wrapper.orderByDesc(NoticeEntity::getPriority)
-                .orderByDesc(NoticeEntity::getCreatedAt);
-
-        return noticeMapper.selectList(wrapper);
+        return noticeRepository.findAllByOrderByPriorityDescCreatedAtDesc();
     }
 
     // ==================== 私有辅助方法 ====================
@@ -298,7 +297,7 @@ public class NoticeService {
     /**
      * 判断平台是否匹配
      *
-     * @param playerPlatform 玩家平台
+     * @param playerPlatform  玩家平台
      * @param noticePlatforms 公告目标平台
      * @return 是否匹配
      */
@@ -320,8 +319,8 @@ public class NoticeService {
      * 判断版本号是否匹配
      *
      * @param playerVersion 玩家版本号
-     * @param minVersion 最小版本号
-     * @param maxVersion 最大版本号
+     * @param minVersion    最小版本号
+     * @param maxVersion    最大版本号
      * @return 是否匹配
      */
     private boolean isVersionMatch(String playerVersion, String minVersion, String maxVersion) {

@@ -1,6 +1,9 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.Data;
 import java.time.LocalDateTime;
 
@@ -13,11 +16,11 @@ import java.time.LocalDateTime;
  * @author xiaoyao
  */
 @Data
-@TableName("t_player_attribute")
+@Table("t_player_attribute")
 public class PlayerStatsEntity {
 
     /** 玩家ID (与 t_player.id 一对一) */
-    @TableId(type = IdType.INPUT)
+    @Id
     private Long playerId;
 
     // ========== 战力 (高频更新) ==========
@@ -64,6 +67,6 @@ public class PlayerStatsEntity {
     private Integer version;
 
     /** 更新时间 */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 }

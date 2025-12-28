@@ -1,8 +1,8 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -14,11 +14,11 @@ import java.time.LocalDateTime;
  * @author xiaoyao
  */
 @Data
-@TableName("t_login_log")
+@Table("t_login_log")
 public class LoginLogEntity {
 
     /** 自增主键 */
-    @TableId(type = IdType.AUTO)
+    @Id
     private Long id;
 
     /** 玩家ID */
@@ -62,6 +62,7 @@ public class LoginLogEntity {
     // 日志表只记录创建时间
 
     /** 创建时间 */
+    @CreatedDate
     private LocalDateTime createdAt;
 
     // 注意：登录日志表不继承 BaseEntity，因为日志表不需要更新/删除功能

@@ -1,8 +1,7 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,11 +12,11 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@TableName("t_equipment")
+@Table("t_equipment")
 public class EquipmentEntity extends BaseEntity {
 
     /** 自增ID */
-    @TableId(type = IdType.AUTO)
+    @Id
     private Long id;
 
     /** 玩家ID */

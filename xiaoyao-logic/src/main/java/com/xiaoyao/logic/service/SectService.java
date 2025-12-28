@@ -4,7 +4,7 @@ import com.xiaoyao.logic.constants.GameConstants;
 import com.xiaoyao.logic.entity.SectMemberEntity;
 import com.xiaoyao.logic.exception.BusinessException;
 import com.xiaoyao.logic.exception.ErrorCode;
-import com.xiaoyao.logic.mapper.SectMemberMapper;
+
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,14 +18,16 @@ import java.util.List;
  * 宗门服务
  * 提供宗门成员管理、贡献度、俸禄等功能
  *
- * <p>职位权限设计：
+ * <p>
+ * 职位权限设计：
  * - 掌门（4）：可以管理所有成员
  * - 副掌门（3）：可以管理长老及以下
  * - 长老（2）：可以管理内门及以下
  * - 内门（1）：可以踢出弟子
  * - 弟子（0）：无管理权限
  *
- * <p>扩展点说明：
+ * <p>
+ * 扩展点说明：
  * 1. 宗门配置（人数上限、俸禄规则等）应由配置管理器提供
  * 2. 俸禄奖励发放应由RewardService实现
  * 3. 宗门事件可触发回调通知系统
@@ -37,13 +39,13 @@ import java.util.List;
 public class SectService {
 
     @Resource
-    private SectMemberMapper sectMemberMapper;
+    private com.xiaoyao.logic.repository.SectMemberRepository sectMemberRepository;
 
     /**
      * 加入宗门
      *
      * @param playerId 玩家ID
-     * @param sectId 宗门配置ID
+     * @param sectId   宗门配置ID
      * @return 成员实体
      * @throws BusinessException 已加入宗门或宗门人数已满
      */
@@ -53,14 +55,14 @@ public class SectService {
         validateSectId(sectId);
 
         // 检查是否已加入宗门
-        SectMemberEntity existingMember = sectMemberMapper.selectByPlayerId(playerId);
+        SectMemberEntity existingMember = sectMemberRepository.findByPlayerId(playerId);
         if (existingMember != null) {
             throw BusinessException.of(ErrorCode.SECT_ALREADY_JOINED,
                     "已加入宗门 playerId=%d sectId=%s", playerId, existingMember.getSectId());
         }
 
         // 检查宗门人数上限
-        Integer memberCount = sectMemberMapper.countBySectId(sectId);
+        Integer memberCount = sectMemberRepository.countBySectId(sectId);
         if (memberCount != null && memberCount >= GameConstants.SECT_MEMBER_MAX_COUNT) {
             throw BusinessException.of(ErrorCode.SECT_MEMBER_FULL,
                     "宗门人数已满 sectId=%s count=%d limit=%d",
@@ -78,7 +80,7 @@ public class SectService {
         member.setTotalSalaryCount(0);
         member.setCreatedBy(playerId);
 
-        sectMemberMapper.insert(member);
+        member = sectMemberRepository.save(member);
 
         log.info("[宗门服务] 加入宗门 playerId={} sectId={} memberId={}",
                 playerId, sectId, member.getId());
@@ -113,7 +115,7 @@ public class SectService {
         member.setDeletedBy(playerId); // 自己退出
         member.setDeletedAt(LocalDateTime.now());
 
-        sectMemberMapper.updateById(member);
+        sectMemberRepository.save(member);
 
         log.info("[宗门服务] 退出宗门 playerId={} sectId={} position={}",
                 playerId, member.getSectId(), member.getPosition());
@@ -125,7 +127,7 @@ public class SectService {
     /**
      * 踢出成员
      *
-     * @param operatorId 操作者ID
+     * @param operatorId     操作者ID
      * @param targetPlayerId 目标玩家ID
      * @throws BusinessException 权限不足或目标玩家不存在
      */
@@ -160,7 +162,7 @@ public class SectService {
         target.setDeletedBy(operatorId); // 记录是谁踢出的
         target.setDeletedAt(LocalDateTime.now());
 
-        sectMemberMapper.updateById(target);
+        sectMemberRepository.save(target);
 
         log.info("[宗门服务] 踢出成员 operatorId={} targetId={} sectId={}",
                 operatorId, targetPlayerId, target.getSectId());
@@ -172,9 +174,9 @@ public class SectService {
     /**
      * 晋升/降职
      *
-     * @param operatorId 操作者ID
+     * @param operatorId     操作者ID
      * @param targetPlayerId 目标玩家ID
-     * @param newPosition 新职位
+     * @param newPosition    新职位
      * @throws BusinessException 权限不足或参数无效
      */
     @Transactional(rollbackFor = Exception.class)
@@ -219,7 +221,7 @@ public class SectService {
         target.setPosition(newPosition);
         target.setUpdatedBy(operatorId);
 
-        sectMemberMapper.updateById(target);
+        sectMemberRepository.save(target);
 
         log.info("[宗门服务] 变更职位 operatorId={} targetId={} position={}->{} sectId={}",
                 operatorId, targetPlayerId, oldPosition, newPosition, target.getSectId());
@@ -231,7 +233,7 @@ public class SectService {
     /**
      * 增加贡献度
      *
-     * @param playerId 玩家ID
+     * @param playerId        玩家ID
      * @param addContribution 增加的贡献度
      * @throws BusinessException 未加入宗门
      */
@@ -252,7 +254,7 @@ public class SectService {
         member.setWeeklyContribution(member.getWeeklyContribution() + addContribution);
         member.setUpdatedBy(playerId);
 
-        sectMemberMapper.updateById(member);
+        sectMemberRepository.save(member);
 
         log.info("[宗门服务] 增加贡献度 playerId={} add={} contribution={}->{} sectId={}",
                 playerId, addContribution, oldContribution, newContribution, member.getSectId());
@@ -287,7 +289,7 @@ public class SectService {
         member.setTotalSalaryCount(member.getTotalSalaryCount() + 1);
         member.setUpdatedBy(playerId);
 
-        sectMemberMapper.updateById(member);
+        sectMemberRepository.save(member);
 
         log.info("[宗门服务] 领取俸禄 playerId={} position={} count={} sectId={}",
                 playerId, member.getPosition(), member.getTotalSalaryCount(), member.getSectId());
@@ -306,7 +308,7 @@ public class SectService {
     public int resetWeeklyContribution(String sectId) {
         validateSectId(sectId);
 
-        Integer count = sectMemberMapper.resetWeeklyContribution(sectId);
+        Integer count = sectMemberRepository.resetWeeklyContribution(sectId);
 
         log.info("[宗门服务] 重置周贡献 sectId={} count={}", sectId, count);
 
@@ -321,7 +323,7 @@ public class SectService {
      */
     public SectMemberEntity getPlayerSect(Long playerId) {
         validatePlayerId(playerId);
-        return sectMemberMapper.selectByPlayerId(playerId);
+        return sectMemberRepository.findByPlayerId(playerId);
     }
 
     /**
@@ -332,14 +334,14 @@ public class SectService {
      */
     public List<SectMemberEntity> getSectMembers(String sectId) {
         validateSectId(sectId);
-        return sectMemberMapper.selectBySectId(sectId);
+        return sectMemberRepository.findBySectId(sectId);
     }
 
     /**
      * 查询宗门贡献度排行榜
      *
      * @param sectId 宗门配置ID
-     * @param limit 限制数量
+     * @param limit  限制数量
      * @return 成员列表（按贡献度降序）
      */
     public List<SectMemberEntity> getContributionRank(String sectId, Integer limit) {
@@ -349,7 +351,7 @@ public class SectService {
             limit = 10; // 默认显示前10名
         }
 
-        return sectMemberMapper.selectTopContributors(sectId, limit);
+        return sectMemberRepository.findTopContributors(sectId, limit);
     }
 
     /**
@@ -360,7 +362,7 @@ public class SectService {
      */
     public int countSectMembers(String sectId) {
         validateSectId(sectId);
-        Integer count = sectMemberMapper.countBySectId(sectId);
+        Integer count = sectMemberRepository.countBySectId(sectId);
         return count != null ? count : 0;
     }
 
@@ -372,7 +374,7 @@ public class SectService {
      * @throws BusinessException 未加入宗门
      */
     private SectMemberEntity getPlayerSectMember(Long playerId) {
-        SectMemberEntity member = sectMemberMapper.selectByPlayerId(playerId);
+        SectMemberEntity member = sectMemberRepository.findByPlayerId(playerId);
         if (member == null) {
             throw BusinessException.of(ErrorCode.SECT_NOT_JOINED,
                     "未加入宗门 playerId=%d", playerId);
@@ -440,7 +442,7 @@ public class SectService {
      */
     @SuppressWarnings("unused")
     private void onPositionChanged(SectMemberEntity operator, SectMemberEntity target,
-                                   Integer oldPosition, Integer newPosition) {
+            Integer oldPosition, Integer newPosition) {
         // TODO: 实现职位变更的回调逻辑
         // 例如：全服公告、发送系统消息等
     }

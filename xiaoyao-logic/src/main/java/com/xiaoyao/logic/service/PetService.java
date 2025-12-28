@@ -4,7 +4,12 @@ import com.xiaoyao.logic.constants.GameConstants;
 import com.xiaoyao.logic.entity.PetEntity;
 import com.xiaoyao.logic.exception.BusinessException;
 import com.xiaoyao.logic.exception.ErrorCode;
-import com.xiaoyao.logic.mapper.PetMapper;
+
+import com.xiaoyao.logic.constants.GameConstants;
+import com.xiaoyao.logic.entity.PetEntity;
+import com.xiaoyao.logic.exception.BusinessException;
+import com.xiaoyao.logic.exception.ErrorCode;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +23,8 @@ import java.util.List;
  * 战宠服务
  * 提供战宠的获取、升级、出战管理等功能
  *
- * <p>扩展点说明：
+ * <p>
+ * 扩展点说明：
  * 1. 战宠配置（成长率、属性等）应由配置管理器提供
  * 2. 战斗力计算应由CombatPowerCalculator实现
  * 3. 战宠升级/进化时可触发回调通知其他系统
@@ -30,13 +36,13 @@ import java.util.List;
 public class PetService {
 
     @Resource
-    private PetMapper petMapper;
+    private com.xiaoyao.logic.repository.PetRepository petRepository;
 
     /**
      * 获得战宠
      *
-     * @param playerId 玩家ID
-     * @param petCfgId 战宠配置ID
+     * @param playerId  玩家ID
+     * @param petCfgId  战宠配置ID
      * @param obtainWay 获取途径（1-战斗捕获 2-商店 3-孵化）
      * @return 战宠实体
      * @throws BusinessException 战宠数量已达上限
@@ -47,7 +53,7 @@ public class PetService {
         validatePetCfgId(petCfgId);
 
         // 检查战宠数量上限
-        Integer petCount = petMapper.countByPlayerId(playerId);
+        Integer petCount = petRepository.countByPlayerIdAndIsDeleted(playerId, GameConstants.DELETED_NO);
         if (petCount != null && petCount >= GameConstants.PET_MAX_COUNT) {
             throw BusinessException.of(ErrorCode.PET_COUNT_LIMIT,
                     "战宠数量已达上限 count=%d limit=%d", petCount, GameConstants.PET_MAX_COUNT);
@@ -76,7 +82,7 @@ public class PetService {
         // pet.setBonusAtk(config.getInitAtk());
         // ...
 
-        petMapper.insert(pet);
+        pet = petRepository.save(pet);
 
         log.info("[战宠服务] 获得战宠 playerId={} petCfgId={} way={} petId={}",
                 playerId, petCfgId, obtainWay, pet.getId());
@@ -88,8 +94,8 @@ public class PetService {
      * 战宠升级
      *
      * @param playerId 玩家ID
-     * @param petId 战宠ID
-     * @param addExp 增加的经验
+     * @param petId    战宠ID
+     * @param addExp   增加的经验
      * @return 是否升级成功
      * @throws BusinessException 战宠不存在
      */
@@ -113,14 +119,14 @@ public class PetService {
         // PetConfig config = petConfigManager.getConfig(pet.getPetCfgId());
         // Long levelUpExp = config.getLevelUpExp(oldLevel);
         // if (newExp >= levelUpExp) {
-        //     pet.setPetLevel(oldLevel + 1);
-        //     pet.setPetExp(newExp - levelUpExp);
-        //     // 计算新的属性加成
-        //     updateBonusAttributes(pet);
+        // pet.setPetLevel(oldLevel + 1);
+        // pet.setPetExp(newExp - levelUpExp);
+        // // 计算新的属性加成
+        // updateBonusAttributes(pet);
         // }
 
         pet.setUpdatedBy(playerId);
-        petMapper.updateById(pet);
+        petRepository.save(pet);
 
         boolean levelChanged = !pet.getPetLevel().equals(oldLevel);
 
@@ -139,7 +145,7 @@ public class PetService {
      * 设置战宠出战
      *
      * @param playerId 玩家ID
-     * @param petId 战宠ID
+     * @param petId    战宠ID
      * @throws BusinessException 战宠不存在或出战数量已达上限
      */
     @Transactional(rollbackFor = Exception.class)
@@ -153,7 +159,7 @@ public class PetService {
         }
 
         // 检查出战战宠数量
-        List<PetEntity> activePets = petMapper.selectActivePets(playerId);
+        List<PetEntity> activePets = petRepository.findActivePets(playerId);
         if (activePets != null && activePets.size() >= GameConstants.PET_ACTIVE_MAX_COUNT) {
             throw BusinessException.of(ErrorCode.PET_ALREADY_ACTIVE,
                     "出战战宠数量已达上限 count=%d limit=%d",
@@ -164,7 +170,7 @@ public class PetService {
         pet.setIsActive(GameConstants.YES);
         pet.setUpdatedBy(playerId);
 
-        petMapper.updateById(pet);
+        petRepository.save(pet);
 
         log.info("[战宠服务] 设置出战 playerId={} petId={} cfgId={}",
                 playerId, petId, pet.getPetCfgId());
@@ -174,7 +180,7 @@ public class PetService {
      * 取消战宠出战
      *
      * @param playerId 玩家ID
-     * @param petId 战宠ID
+     * @param petId    战宠ID
      * @throws BusinessException 战宠不存在
      */
     @Transactional(rollbackFor = Exception.class)
@@ -191,7 +197,7 @@ public class PetService {
         pet.setIsActive(GameConstants.NO);
         pet.setUpdatedBy(playerId);
 
-        petMapper.updateById(pet);
+        petRepository.save(pet);
 
         log.info("[战宠服务] 取消出战 playerId={} petId={} cfgId={}",
                 playerId, petId, pet.getPetCfgId());
@@ -200,8 +206,8 @@ public class PetService {
     /**
      * 喂养战宠（恢复饱食度）
      *
-     * @param playerId 玩家ID
-     * @param petId 战宠ID
+     * @param playerId  玩家ID
+     * @param petId     战宠ID
      * @param addHunger 增加的饱食度
      * @throws BusinessException 战宠不存在
      */
@@ -221,7 +227,7 @@ public class PetService {
         pet.setHunger(newHunger);
         pet.setUpdatedBy(playerId);
 
-        petMapper.updateById(pet);
+        petRepository.save(pet);
 
         log.info("[战宠服务] 喂养战宠 playerId={} petId={} hunger={}->{}",
                 playerId, petId, oldHunger, newHunger);
@@ -231,8 +237,8 @@ public class PetService {
      * 提升心情值
      *
      * @param playerId 玩家ID
-     * @param petId 战宠ID
-     * @param addMood 增加的心情值
+     * @param petId    战宠ID
+     * @param addMood  增加的心情值
      * @throws BusinessException 战宠不存在
      */
     @Transactional(rollbackFor = Exception.class)
@@ -251,7 +257,7 @@ public class PetService {
         pet.setMood(newMood);
         pet.setUpdatedBy(playerId);
 
-        petMapper.updateById(pet);
+        petRepository.save(pet);
 
         log.info("[战宠服务] 提升心情 playerId={} petId={} mood={}->{}",
                 playerId, petId, oldMood, newMood);
@@ -261,8 +267,8 @@ public class PetService {
      * 重命名战宠
      *
      * @param playerId 玩家ID
-     * @param petId 战宠ID
-     * @param newName 新名称
+     * @param petId    战宠ID
+     * @param newName  新名称
      * @throws BusinessException 战宠不存在或名称无效
      */
     @Transactional(rollbackFor = Exception.class)
@@ -282,7 +288,7 @@ public class PetService {
         pet.setPetName(newName);
         pet.setUpdatedBy(playerId);
 
-        petMapper.updateById(pet);
+        petRepository.save(pet);
 
         log.info("[战宠服务] 重命名战宠 playerId={} petId={} name={}",
                 playerId, petId, newName);
@@ -292,7 +298,7 @@ public class PetService {
      * 放生战宠（逻辑删除）
      *
      * @param playerId 玩家ID
-     * @param petId 战宠ID
+     * @param petId    战宠ID
      * @throws BusinessException 战宠不存在
      */
     @Transactional(rollbackFor = Exception.class)
@@ -305,7 +311,7 @@ public class PetService {
         pet.setDeletedBy(playerId);
         pet.setDeletedAt(LocalDateTime.now());
 
-        petMapper.updateById(pet);
+        petRepository.save(pet);
 
         log.info("[战宠服务] 放生战宠 playerId={} petId={} cfgId={}",
                 playerId, petId, pet.getPetCfgId());
@@ -319,7 +325,7 @@ public class PetService {
      */
     public List<PetEntity> getPlayerPets(Long playerId) {
         validatePlayerId(playerId);
-        return petMapper.selectByPlayerId(playerId);
+        return petRepository.findByPlayerId(playerId);
     }
 
     /**
@@ -330,14 +336,14 @@ public class PetService {
      */
     public List<PetEntity> getActivePets(Long playerId) {
         validatePlayerId(playerId);
-        return petMapper.selectActivePets(playerId);
+        return petRepository.findActivePets(playerId);
     }
 
     /**
      * 根据ID查询战宠
      *
      * @param playerId 玩家ID
-     * @param petId 战宠ID
+     * @param petId    战宠ID
      * @return 战宠实体
      * @throws BusinessException 战宠不存在
      */
@@ -348,7 +354,7 @@ public class PetService {
             throw BusinessException.of(ErrorCode.PARAM_INVALID, "战宠ID无效");
         }
 
-        PetEntity pet = petMapper.selectById(petId);
+        PetEntity pet = petRepository.findById(petId).orElse(null);
         if (pet == null || pet.getIsDeleted() == GameConstants.DELETED_YES) {
             throw BusinessException.of(ErrorCode.PET_NOT_FOUND,
                     "战宠不存在 playerId=%d petId=%d", playerId, petId);
@@ -372,9 +378,9 @@ public class PetService {
     public int[] calculateTotalBonusAttributes(Long playerId) {
         validatePlayerId(playerId);
 
-        List<PetEntity> activePets = petMapper.selectActivePets(playerId);
+        List<PetEntity> activePets = petRepository.findActivePets(playerId);
         if (activePets == null || activePets.isEmpty()) {
-            return new int[]{0, 0, 0};
+            return new int[] { 0, 0, 0 };
         }
 
         int totalAtk = 0;
@@ -390,7 +396,7 @@ public class PetService {
             totalHp += (int) (pet.getBonusHp() * factor);
         }
 
-        return new int[]{totalAtk, totalDef, totalHp};
+        return new int[] { totalAtk, totalDef, totalHp };
     }
 
     // ==================== 私有辅助方法 ====================
@@ -400,7 +406,7 @@ public class PetService {
      * 饱食度和心情值都低于50时属性打折扣
      *
      * @param hunger 饱食度
-     * @param mood 心情值
+     * @param mood   心情值
      * @return 属性系数（0.5-1.0）
      */
     private double calculateAttributeFactor(Integer hunger, Integer mood) {
@@ -420,9 +426,12 @@ public class PetService {
     private void updateBonusAttributes(PetEntity pet) {
         // TODO: 根据配置和等级计算属性加成
         // PetConfig config = petConfigManager.getConfig(pet.getPetCfgId());
-        // pet.setBonusAtk(config.getBaseAtk() + pet.getPetLevel() * config.getAtkGrowth());
-        // pet.setBonusDef(config.getBaseDef() + pet.getPetLevel() * config.getDefGrowth());
-        // pet.setBonusHp(config.getBaseHp() + pet.getPetLevel() * config.getHpGrowth());
+        // pet.setBonusAtk(config.getBaseAtk() + pet.getPetLevel() *
+        // config.getAtkGrowth());
+        // pet.setBonusDef(config.getBaseDef() + pet.getPetLevel() *
+        // config.getDefGrowth());
+        // pet.setBonusHp(config.getBaseHp() + pet.getPetLevel() *
+        // config.getHpGrowth());
     }
 
     /**

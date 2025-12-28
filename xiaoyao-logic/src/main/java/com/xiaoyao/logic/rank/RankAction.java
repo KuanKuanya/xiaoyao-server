@@ -5,10 +5,9 @@ import com.iohao.net.framework.annotations.ActionMethod;
 import com.iohao.net.framework.core.flow.FlowContext;
 import com.xiaoyao.common.cmd.RankCmd;
 import com.xiaoyao.common.proto.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import jakarta.annotation.Resource;
 
 /**
  * 排行榜模块 Action
@@ -16,16 +15,13 @@ import jakarta.annotation.Resource;
  * @author xiaoyao
  */
 @Slf4j
+@RequiredArgsConstructor
 @Component
 @ActionController(RankCmd.cmd)
 public class RankAction {
 
-    @Resource
-    private RankService rankService;
+    private final RankService rankService;
 
-    /**
-     * 获取战力排行
-     */
     @ActionMethod(RankCmd.getCombatPowerRank)
     public RankListResp getCombatPowerRank(FlowContext flowContext) {
         long playerId = flowContext.getUserId();
@@ -33,9 +29,6 @@ public class RankAction {
         return rankService.getRankList(playerId, 1);
     }
 
-    /**
-     * 获取境界排行
-     */
     @ActionMethod(RankCmd.getRealmRank)
     public RankListResp getRealmRank(FlowContext flowContext) {
         long playerId = flowContext.getUserId();
@@ -43,9 +36,6 @@ public class RankAction {
         return rankService.getRankList(playerId, 2);
     }
 
-    /**
-     * 获取财富排行
-     */
     @ActionMethod(RankCmd.getWealthRank)
     public RankListResp getWealthRank(FlowContext flowContext) {
         long playerId = flowContext.getUserId();
@@ -53,9 +43,6 @@ public class RankAction {
         return rankService.getRankList(playerId, 3);
     }
 
-    /**
-     * 获取我的排名
-     */
     @ActionMethod(RankCmd.getMyRank)
     public RankEntry getMyRank(FlowContext flowContext) {
         long playerId = flowContext.getUserId();

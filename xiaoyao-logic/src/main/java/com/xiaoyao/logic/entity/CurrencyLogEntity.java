@@ -1,8 +1,9 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -14,11 +15,11 @@ import java.time.LocalDateTime;
  * @author xiaoyao
  */
 @Data
-@TableName("t_currency_log")
+@Table("t_currency_log")
 public class CurrencyLogEntity {
 
     /** 自增主键 */
-    @TableId(type = IdType.AUTO)
+    @Id
     private Long id;
 
     /** 玩家ID */
@@ -56,9 +57,11 @@ public class CurrencyLogEntity {
     // 日志表只记录创建信息，不需要更新和删除
 
     /** 操作人ID (玩家ID或GM ID) */
+    @CreatedBy
     private Long createdBy;
 
     /** 创建时间 */
+    @CreatedDate
     private LocalDateTime createdAt;
 
     // 注意：货币日志表不继承 BaseEntity，因为日志表不需要更新/删除功能

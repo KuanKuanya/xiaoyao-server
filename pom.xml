@@ -31,7 +31,8 @@
         <ionet.version>25.2</ionet.version>
 
         <!-- Spring Boot 3 版本 -->
-        <spring-boot.version>3.4.1</spring-boot.version>
+        <!-- Spring Boot 4 版本 -->
+        <spring-boot.version>4.0.0</spring-boot.version>
 
         <!-- 数据库相关 -->
         <mysql.version>8.0.33</mysql.version>
@@ -151,17 +152,17 @@
                 <version>${mysql.version}</version>
             </dependency>
 
+            <!-- Spring Data JDBC (取代 MyBatis-Plus) -->
             <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-                <version>${mybatis-plus.version}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-jdbc</artifactId>
+                <version>${spring-boot.version}</version>
             </dependency>
 
-            <!-- MyBatis-Plus 3.5.9+ 需要单独引入 jsqlparser -->
             <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-jsqlparser</artifactId>
-                <version>${mybatis-plus.version}</version>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid</artifactId>
+                <version>${druid.version}</version>
             </dependency>
 
             <dependency>

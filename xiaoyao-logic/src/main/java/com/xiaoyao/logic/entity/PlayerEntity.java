@@ -1,6 +1,7 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,11 +16,11 @@ import java.time.LocalDateTime;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("t_player")
+@Table("t_player")
 public class PlayerEntity extends BaseEntity {
 
     /** 玩家ID (雪花算法) */
-    @TableId(type = IdType.ASSIGN_ID)
+    @Id
     private Long id;
 
     /** 设备ID */

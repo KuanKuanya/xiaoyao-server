@@ -36,3 +36,5 @@ Thumbs.db
 # Build
 build/
 dist/
+.claude
+.spec-workflow

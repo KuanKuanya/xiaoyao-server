@@ -6,7 +6,6 @@ import com.xiaoyao.common.proto.BreakthroughResp;
 import com.xiaoyao.common.proto.CultivateResp;
 import com.xiaoyao.common.proto.PlayerData;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 /**
  * 境界服务
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
  * @author xiaoyao
  */
 @Slf4j
-@Service
 public class RealmService {
 
     /** 最大境界数量 */

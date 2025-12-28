@@ -1,8 +1,7 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -16,13 +15,13 @@ import java.time.LocalDateTime;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("t_notice")
+@Table("t_notice")
 public class NoticeEntity extends BaseEntity {
 
     /**
      * 公告ID
      */
-    @TableId(type = IdType.AUTO)
+    @Id
     private Long id;
 
     /**
