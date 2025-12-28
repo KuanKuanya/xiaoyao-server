@@ -1,14 +1,17 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
 
 /**
  * 装备实体
  *
  * @author xiaoyao
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("t_equipment")
 public class EquipmentEntity extends BaseEntity {

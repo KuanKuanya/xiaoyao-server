@@ -5,6 +5,7 @@ import com.iohao.net.framework.core.flow.internal.DebugInOut;
 import com.iohao.net.framework.protocol.ServerBuilder;
 import com.iohao.net.server.LogicServer;
 import com.xiaoyao.logic.player.PlayerAction;
+import com.xiaoyao.logic.rank.RankAction;
 import com.xiaoyao.logic.realm.RealmAction;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,12 +19,13 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class HallLogicServer implements LogicServer {
-    
+
     @Override
     public void settingBarSkeletonBuilder(BarSkeletonBuilder builder) {
         // 扫描 Action 类所在包
         builder.scanActionPackage(PlayerAction.class);
         builder.scanActionPackage(RealmAction.class);
+        builder.scanActionPackage(RankAction.class);
         
         // 添加调试插件 (生产环境可关闭)
         builder.addInOut(new DebugInOut());

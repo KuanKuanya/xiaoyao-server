@@ -6,6 +6,7 @@ import com.xiaoyao.common.proto.BreakthroughResp;
 import com.xiaoyao.common.proto.CultivateResp;
 import com.xiaoyao.common.proto.PlayerData;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 /**
  * 境界服务
@@ -16,14 +17,15 @@ import lombok.extern.slf4j.Slf4j;
  * @author xiaoyao
  */
 @Slf4j
+@Service
 public class RealmService {
-    
+
     /** 最大境界数量 */
     private static final int MAX_REALM = 108;
-    
+
     /** 每秒基础经验 */
     private static final long BASE_EXP_PER_SECOND = 10;
-    
+
     /**
      * 修炼 - 计算并领取挂机经验
      *
@@ -33,22 +35,22 @@ public class RealmService {
     public CultivateResp cultivate(PlayerData playerData) {
         long now = System.currentTimeMillis();
         long lastTime = playerData.getLastCultivateTime();
-        
+
         // 计算挂机时长 (秒)
         long duration = Math.max(0, (now - lastTime) / 1000);
-        
+
         // 根据境界计算经验倍率
         int realmId = playerData.getRealmId();
         double expRate = 1.0 + (realmId - 1) * 0.1; // 每个境界增加10%经验
-        
+
         // 计算获得的经验
         long expGain = (long) (duration * BASE_EXP_PER_SECOND * expRate);
-        
+
         // 更新玩家数据
         long newExp = playerData.getRealmExp() + expGain;
         playerData.setRealmExp(newExp);
         playerData.setLastCultivateTime(now);
-        
+
         // 构建响应
         CultivateResp resp = new CultivateResp();
         resp.setExpGain(expGain);
@@ -56,13 +58,13 @@ public class RealmService {
         resp.setRealmId(realmId);
         resp.setDuration(duration);
         resp.setNextCultivateTime(now);
-        
-        log.info("[修炼收益] playerId={}, duration={}s, expGain={}", 
+
+        log.info("[修炼收益] playerId={}, duration={}s, expGain={}",
                 playerData.getPlayerId(), duration, expGain);
-        
+
         return resp;
     }
-    
+
     /**
      * 突破境界
      *
@@ -71,34 +73,34 @@ public class RealmService {
      */
     public BreakthroughResp breakthrough(PlayerData playerData) throws MessageException {
         int currentRealmId = playerData.getRealmId();
-        
+
         // 检查是否已达最高境界
         if (currentRealmId >= MAX_REALM) {
             throw new MessageException(RealmError.REALM_MAX);
         }
-        
+
         // 获取突破所需经验
         long requiredExp = getRequiredExp(currentRealmId);
-        
+
         // 检查经验是否足够
         if (playerData.getRealmExp() < requiredExp) {
             throw new MessageException(RealmError.EXP_NOT_FULL);
         }
-        
+
         // 执行突破
         int newRealmId = currentRealmId + 1;
         playerData.setRealmId(newRealmId);
         playerData.setRealmExp(playerData.getRealmExp() - requiredExp);
-        
+
         // 计算属性加成
         int atkBonus = getAtkBonus(newRealmId);
         int defBonus = getDefBonus(newRealmId);
         int hpBonus = getHpBonus(newRealmId);
-        
+
         // 更新战斗力
         long newCombatPower = calculateCombatPower(playerData);
         playerData.setCombatPower(newCombatPower);
-        
+
         // 构建响应
         BreakthroughResp resp = new BreakthroughResp();
         resp.setSuccess(true);
@@ -108,37 +110,88 @@ public class RealmService {
         resp.setDefBonus(defBonus);
         resp.setHpBonus(hpBonus);
         resp.setCombatPower(newCombatPower);
-        
-        log.info("[突破成功] playerId={}, newRealm={} {}", 
+
+        log.info("[突破成功] playerId={}, newRealm={} {}",
                 playerData.getPlayerId(), newRealmId, resp.getNewRealmName());
-        
+
         return resp;
     }
-    
+
+    /**
+     * 飞升 (进入仙人境界)
+     *
+     * @param playerData 玩家数据
+     * @return 飞升结果
+     */
+    public BreakthroughResp ascend(PlayerData playerData) throws MessageException {
+        int currentRealmId = playerData.getRealmId();
+
+        // 检查是否已飞升
+        if (playerData.isAscended()) {
+            throw new MessageException(RealmError.ALREADY_ASCENDED);
+        }
+
+        // 检查是否达到飞升条件 (渡劫期圆满，realmId=90)
+        if (currentRealmId < 90) {
+            throw new MessageException(RealmError.REALM_NOT_ENOUGH);
+        }
+
+        // 执行飞升
+        playerData.setAscended(true);
+        int newRealmId = 91; // 地仙一层
+        playerData.setRealmId(newRealmId);
+        playerData.setRealmExp(0);
+
+        // 飞升奖励
+        long bonusSpiritStone = 100000;
+        long bonusJade = 1000;
+        playerData.setSpiritStone(playerData.getSpiritStone() + bonusSpiritStone);
+        playerData.setJade(playerData.getJade() + bonusJade);
+
+        // 更新战斗力
+        long newCombatPower = calculateCombatPower(playerData) * 10;
+        playerData.setCombatPower(newCombatPower);
+
+        // 构建响应
+        BreakthroughResp resp = new BreakthroughResp();
+        resp.setSuccess(true);
+        resp.setNewRealmId(newRealmId);
+        resp.setNewRealmName(getRealmName(newRealmId));
+        resp.setAtkBonus(getAtkBonus(newRealmId));
+        resp.setDefBonus(getDefBonus(newRealmId));
+        resp.setHpBonus(getHpBonus(newRealmId));
+        resp.setCombatPower(newCombatPower);
+
+        log.info("[飞升成功] playerId={}, newRealm={} {}",
+                playerData.getPlayerId(), newRealmId, resp.getNewRealmName());
+
+        return resp;
+    }
+
     /**
      * 获取境界名称
      */
     public String getRealmName(int realmId) {
         // 大境界
         String[] majorRealms = {
-            "练气", "筑基", "金丹", "元婴", "化神",
-            "炼虚", "合体", "大乘", "渡劫",
-            "地仙", "天仙", "金仙", "太乙金仙", "大罗金仙"
+                "练气", "筑基", "金丹", "元婴", "化神",
+                "炼虚", "合体", "大乘", "渡劫",
+                "地仙", "天仙", "金仙", "太乙金仙", "大罗金仙"
         };
-        
+
         // 小境界
-        String[] minorRealms = {"一层", "二层", "三层", "四层", "五层", "六层", "七层", "八层", "九层", "圆满"};
-        
+        String[] minorRealms = { "一层", "二层", "三层", "四层", "五层", "六层", "七层", "八层", "九层", "圆满" };
+
         int majorIndex = (realmId - 1) / 10;
         int minorIndex = (realmId - 1) % 10;
-        
+
         if (majorIndex >= majorRealms.length) {
             return "大罗金仙·圆满";
         }
-        
+
         return majorRealms[majorIndex] + "期·" + minorRealms[minorIndex];
     }
-    
+
     /**
      * 获取突破所需经验
      */
@@ -146,28 +199,28 @@ public class RealmService {
         // 指数增长公式
         return (long) (100 * Math.pow(1.5, realmId - 1));
     }
-    
+
     /**
      * 获取攻击力加成
      */
     private int getAtkBonus(int realmId) {
         return realmId * 10;
     }
-    
+
     /**
      * 获取防御力加成
      */
     private int getDefBonus(int realmId) {
         return realmId * 5;
     }
-    
+
     /**
      * 获取生命值加成
      */
     private int getHpBonus(int realmId) {
         return realmId * 50;
     }
-    
+
     /**
      * 计算战斗力
      */
@@ -176,7 +229,7 @@ public class RealmService {
         int atk = getAtkBonus(realmId);
         int def = getDefBonus(realmId);
         int hp = getHpBonus(realmId);
-        
+
         return (long) (atk * 2 + def * 1.5 + hp * 0.5);
     }
 }

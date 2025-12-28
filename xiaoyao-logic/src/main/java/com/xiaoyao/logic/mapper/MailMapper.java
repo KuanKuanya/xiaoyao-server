@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Mapper
 public interface MailMapper extends BaseMapper<MailEntity> {
-    
+
     /**
      * 根据玩家ID查询未过期邮件
      */
@@ -22,6 +22,6 @@ public interface MailMapper extends BaseMapper<MailEntity> {
         return selectList(new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<MailEntity>()
                 .eq(MailEntity::getPlayerId, playerId)
                 .gt(MailEntity::getExpireTime, LocalDateTime.now())
-                .orderByDesc(MailEntity::getCreateTime));
+                .orderByDesc(MailEntity::getCreatedAt));
     }
 }

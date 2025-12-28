@@ -35,6 +35,12 @@
             <artifactId>extension-domain-event</artifactId>
         </dependency>
 
+        <!-- ionet Spring 集成 -->
+        <dependency>
+            <groupId>com.iohao.net</groupId>
+            <artifactId>extension-spring</artifactId>
+        </dependency>
+
         <!-- 数据库 -->
         <dependency>
             <groupId>mysql</groupId>
@@ -43,7 +49,12 @@
 
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-jsqlparser</artifactId>
         </dependency>
 
         <dependency>

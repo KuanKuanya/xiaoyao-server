@@ -1,11 +1,13 @@
 package com.xiaoyao.common.proto;
 
+import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import lombok.Data;
 
 /**
  * 排行榜条目
  */
 @Data
+@ProtobufClass
 public class RankEntry {
     /** 排名 */
     private int rank;

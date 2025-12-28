@@ -1,5 +1,6 @@
 package com.xiaoyao.common.proto;
 
+import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import lombok.Data;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import java.util.List;
  * 排行榜响应
  */
 @Data
+@ProtobufClass
 public class RankListResp {
     /** 排行榜类型 */
     private int rankType;

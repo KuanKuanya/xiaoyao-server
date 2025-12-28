@@ -8,7 +8,7 @@ import com.xiaoyao.logic.mapper.CurrencyLogMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.time.LocalDateTime;
 
 /**
@@ -89,21 +89,22 @@ public class CurrencyLogService {
                     : beforeAmount - amount;
 
             // 创建日志实体
-            CurrencyLogEntity log = new CurrencyLogEntity();
-            log.setPlayerId(playerId);
-            log.setCurrencyType(currencyType.getCode());
-            log.setChangeType(changeType.getCode());
-            log.setChangeAmount(amount);
-            log.setBeforeAmount(beforeAmount);
-            log.setAfterAmount(afterAmount);
-            log.setSourceType(sourceType.getCode());
-            log.setSourceId(sourceId != null ? sourceId : "");
-            log.setRemark(remark != null ? remark : "");
-            log.setCreatedBy(playerId);  // 操作人默认为玩家自己
-            log.setCreatedAt(LocalDateTime.now());
+            CurrencyLogEntity currencyLogEntity = new CurrencyLogEntity();
+            currencyLogEntity.setPlayerId(playerId);
+            currencyLogEntity.setCurrencyType(currencyType.getCode());
+            currencyLogEntity.setChangeType(changeType.getCode());
+            currencyLogEntity.setChangeAmount(amount);
+            currencyLogEntity.setBeforeAmount(beforeAmount);
+            currencyLogEntity.setAfterAmount(afterAmount);
+            currencyLogEntity.setSourceType(sourceType.getCode());
+            currencyLogEntity.setSourceId(sourceId != null ? sourceId : "");
+            currencyLogEntity.setRemark(remark != null ? remark : "");
+            // 操作人默认为玩家自己
+            currencyLogEntity.setCreatedBy(playerId);
+            currencyLogEntity.setCreatedAt(LocalDateTime.now());
 
             // 插入数据库
-            currencyLogMapper.insert(log);
+            currencyLogMapper.insert(currencyLogEntity);
 
             log.info("[货币日志] playerId={} 货币={} 操作={} 数量={} 前={} 后={} 来源={}:{}",
                     playerId,
@@ -144,20 +145,21 @@ public class CurrencyLogService {
                     ? beforeAmount + amount
                     : beforeAmount - amount;
 
-            CurrencyLogEntity log = new CurrencyLogEntity();
-            log.setPlayerId(playerId);
-            log.setCurrencyType(currencyType.getCode());
-            log.setChangeType(changeType.getCode());
-            log.setChangeAmount(amount);
-            log.setBeforeAmount(beforeAmount);
-            log.setAfterAmount(afterAmount);
-            log.setSourceType(CurrencySourceType.GM.getCode());
-            log.setSourceId("GM:" + gmId);
-            log.setRemark(remark != null ? remark : "");
-            log.setCreatedBy(gmId);  // 操作人为GM
-            log.setCreatedAt(LocalDateTime.now());
+            CurrencyLogEntity currencyLogEntity = new CurrencyLogEntity();
+            currencyLogEntity.setPlayerId(playerId);
+            currencyLogEntity.setCurrencyType(currencyType.getCode());
+            currencyLogEntity.setChangeType(changeType.getCode());
+            currencyLogEntity.setChangeAmount(amount);
+            currencyLogEntity.setBeforeAmount(beforeAmount);
+            currencyLogEntity.setAfterAmount(afterAmount);
+            currencyLogEntity.setSourceType(CurrencySourceType.GM.getCode());
+            currencyLogEntity.setSourceId("GM:" + gmId);
+            currencyLogEntity.setRemark(remark != null ? remark : "");
+            // 操作人为GM
+            currencyLogEntity.setCreatedBy(gmId);
+            currencyLogEntity.setCreatedAt(LocalDateTime.now());
 
-            currencyLogMapper.insert(log);
+            currencyLogMapper.insert(currencyLogEntity);
 
             log.warn("[GM货币操作] gmId={} playerId={} 货币={} 操作={} 数量={} 前={} 后={} 原因={}",
                     gmId, playerId, currencyType.getDesc(), changeType.getDesc(),

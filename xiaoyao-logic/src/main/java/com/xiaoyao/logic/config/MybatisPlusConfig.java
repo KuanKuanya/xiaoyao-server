@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.logging.stdout.StdOutImpl;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
@@ -27,19 +26,19 @@ import javax.sql.DataSource;
 @Configuration
 @MapperScan("com.xiaoyao.logic.mapper")
 public class MybatisPlusConfig {
-    
+
     @Value("${spring.datasource.url:jdbc:mysql://127.0.0.1:3306/xiaoyao_game?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8}")
     private String jdbcUrl;
-    
+
     @Value("${spring.datasource.username:root}")
     private String username;
-    
+
     @Value("${spring.datasource.password:123456}")
     private String password;
-    
+
     @Value("${spring.datasource.driver-class-name:com.mysql.cj.jdbc.Driver}")
     private String driverClassName;
-    
+
     @Bean
     public DataSource dataSource() {
         DruidDataSource dataSource = new DruidDataSource();
@@ -47,7 +46,7 @@ public class MybatisPlusConfig {
         dataSource.setUrl(jdbcUrl);
         dataSource.setUsername(username);
         dataSource.setPassword(password);
-        
+
         // 连接池配置
         dataSource.setInitialSize(5);
         dataSource.setMinIdle(5);
@@ -59,11 +58,11 @@ public class MybatisPlusConfig {
         dataSource.setTestWhileIdle(true);
         dataSource.setTestOnBorrow(false);
         dataSource.setTestOnReturn(false);
-        
+
         log.info("[数据源] 初始化完成 url={}", jdbcUrl);
         return dataSource;
     }
-    
+
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
@@ -71,11 +70,11 @@ public class MybatisPlusConfig {
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
         return interceptor;
     }
-    
+
     @Bean
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource,
-                                               MybatisPlusInterceptor interceptor,
-                                               MetaObjectHandlerConfig metaObjectHandler) throws Exception {
+            MybatisPlusInterceptor interceptor,
+            MetaObjectHandlerConfig metaObjectHandler) throws Exception {
         MybatisSqlSessionFactoryBean factory = new MybatisSqlSessionFactoryBean();
         factory.setDataSource(dataSource);
         factory.setPlugins(interceptor);
@@ -92,9 +91,9 @@ public class MybatisPlusConfig {
         GlobalConfig globalConfig = new GlobalConfig();
         GlobalConfig.DbConfig dbConfig = new GlobalConfig.DbConfig();
         // 逻辑删除配置
-        dbConfig.setLogicDeleteField("isDeleted");  // 实体类字段名
-        dbConfig.setLogicDeleteValue("1");          // 删除值
-        dbConfig.setLogicNotDeleteValue("0");       // 未删除值
+        dbConfig.setLogicDeleteField("isDeleted"); // 实体类字段名
+        dbConfig.setLogicDeleteValue("1"); // 删除值
+        dbConfig.setLogicNotDeleteValue("0"); // 未删除值
         globalConfig.setDbConfig(dbConfig);
 
         // 设置字段自动填充处理器
@@ -105,7 +104,7 @@ public class MybatisPlusConfig {
         log.info("[MyBatis-Plus] 全局配置完成 - 逻辑删除: isDeleted");
         return factory.getObject();
     }
-    
+
     @Bean
     public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
         return new SqlSessionTemplate(sqlSessionFactory);

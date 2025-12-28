@@ -6,6 +6,9 @@ import com.iohao.net.framework.core.flow.FlowContext;
 import com.xiaoyao.common.cmd.RankCmd;
 import com.xiaoyao.common.proto.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import jakarta.annotation.Resource;
 
 /**
  * 排行榜模块 Action
@@ -13,11 +16,13 @@ import lombok.extern.slf4j.Slf4j;
  * @author xiaoyao
  */
 @Slf4j
+@Component
 @ActionController(RankCmd.cmd)
 public class RankAction {
-    
-    private final RankService rankService = new RankService();
-    
+
+    @Resource
+    private RankService rankService;
+
     /**
      * 获取战力排行
      */
@@ -27,7 +32,7 @@ public class RankAction {
         log.debug("[排行榜] 获取战力排行 playerId={}", playerId);
         return rankService.getRankList(playerId, 1);
     }
-    
+
     /**
      * 获取境界排行
      */
@@ -37,7 +42,7 @@ public class RankAction {
         log.debug("[排行榜] 获取境界排行 playerId={}", playerId);
         return rankService.getRankList(playerId, 2);
     }
-    
+
     /**
      * 获取财富排行
      */
@@ -47,7 +52,7 @@ public class RankAction {
         log.debug("[排行榜] 获取财富排行 playerId={}", playerId);
         return rankService.getRankList(playerId, 3);
     }
-    
+
     /**
      * 获取我的排名
      */

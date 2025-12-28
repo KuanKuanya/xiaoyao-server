@@ -1,27 +1,31 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
-
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * 玩家属性实体
- * 存储玩家的战斗属性，与 t_player 一对一关系
+ * 对应表: t_player_attribute
+ * 存储战斗属性，与 t_player 一对一关系
+ * 百分比属性使用万分比整型存储: 500=5%, 10000=100%, 15000=150%
  *
  * @author xiaoyao
  */
 @Data
-@TableName("t_player_stats")
-public class PlayerStatsEntity extends BaseEntity {
+@TableName("t_player_attribute")
+public class PlayerStatsEntity {
 
     /** 玩家ID (与 t_player.id 一对一) */
-    @TableId(type = IdType.INPUT)  // 不自增，直接使用 playerId
-    private Long id;
+    @TableId(type = IdType.INPUT)
+    private Long playerId;
 
-    // ============ 基础属性 ============
+    // ========== 战力 (高频更新) ==========
+
+    /** 战斗力 */
+    private Long combatPower;
+
+    // ========== 基础属性 ==========
 
     /** 基础攻击 */
     private Integer baseAtk;
@@ -35,30 +39,31 @@ public class PlayerStatsEntity extends BaseEntity {
     /** 基础法力 */
     private Integer baseMp;
 
-    // ============ 战斗属性 ============
+    // ========== 战斗属性 (万分比: 500=5%) ==========
 
-    /** 暴击率 (0.0500 = 5%) */
-    private BigDecimal critRate;
+    /** 暴击率 (万分比) */
+    private Integer critRate;
 
-    /** 暴击伤害倍率 (1.5000 = 150%) */
-    private BigDecimal critDamage;
+    /** 暴击伤害 (万分比, 15000=150%) */
+    private Integer critDamage;
 
-    /** 闪避率 */
-    private BigDecimal dodgeRate;
+    /** 闪避率 (万分比) */
+    private Integer dodgeRate;
 
-    /** 命中率 */
-    private BigDecimal hitRate;
+    /** 命中率 (万分比) */
+    private Integer hitRate;
 
-    /** 格挡率 */
-    private BigDecimal blockRate;
+    /** 格挡率 (万分比) */
+    private Integer blockRate;
 
-    /** 吸血率 */
-    private BigDecimal lifestealRate;
+    /** 吸血率 (万分比) */
+    private Integer lifestealRate;
 
-    // ============ 计算属性 ============
+    /** 乐观锁版本号 */
+    @Version
+    private Integer version;
 
-    /** 战斗力 */
-    private Long combatPower;
-
-    // 公共字段 (version, is_deleted, created_at, updated_at等) 已由 BaseEntity 提供
+    /** 更新时间 */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updatedAt;
 }

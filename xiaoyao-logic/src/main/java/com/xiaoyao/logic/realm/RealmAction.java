@@ -10,58 +10,75 @@ import com.xiaoyao.common.proto.BreakthroughResp;
 import com.xiaoyao.common.proto.CultivateResp;
 import com.xiaoyao.common.proto.PlayerData;
 import com.xiaoyao.logic.player.PlayerService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 /**
  * 境界模块 Action
  * <p>
  * 处理修炼、突破、飞升等请求
+ * 使用 Spring @Resource 依赖注入
  * </p>
  *
  * @author xiaoyao
  */
 @Slf4j
+@Component
 @ActionController(RealmCmd.cmd)
 public class RealmAction {
-    
-    private final RealmService realmService = new RealmService();
-    private final PlayerService playerService = new PlayerService();
-    
+
+    @Resource
+    private RealmService realmService;
+
+    @Resource
+    private PlayerService playerService;
+
     /**
      * 领取修炼收益 (挂机经验)
-     *
-     * @param flowContext 请求上下文
-     * @return 修炼收益
      */
     @ActionMethod(RealmCmd.cultivate)
     public CultivateResp cultivate(FlowContext flowContext) {
         long playerId = flowContext.getUserId();
         log.info("[修炼] playerId={}", playerId);
-        
+
         PlayerData playerData = playerService.getPlayerData(playerId);
         if (playerData == null) {
-            throw new MessageException(RealmError.EXP_NOT_ENOUGH);
+            throw new MessageException(RealmError.PLAYER_NOT_FOUND);
         }
-        
+
         return realmService.cultivate(playerData);
     }
-    
+
     /**
      * 突破境界
-     *
-     * @param flowContext 请求上下文
-     * @return 突破结果
      */
     @ActionMethod(RealmCmd.breakthrough)
     public BreakthroughResp breakthrough(FlowContext flowContext) throws MessageException {
         long playerId = flowContext.getUserId();
         log.info("[突破境界] playerId={}", playerId);
-        
+
         PlayerData playerData = playerService.getPlayerData(playerId);
         if (playerData == null) {
-            throw new MessageException(RealmError.EXP_NOT_ENOUGH);
+            throw new MessageException(RealmError.PLAYER_NOT_FOUND);
         }
-        
+
         return realmService.breakthrough(playerData);
+    }
+
+    /**
+     * 飞升
+     */
+    @ActionMethod(RealmCmd.ascend)
+    public BreakthroughResp ascend(FlowContext flowContext) throws MessageException {
+        long playerId = flowContext.getUserId();
+        log.info("[飞升] playerId={}", playerId);
+
+        PlayerData playerData = playerService.getPlayerData(playerId);
+        if (playerData == null) {
+            throw new MessageException(RealmError.PLAYER_NOT_FOUND);
+        }
+
+        return realmService.ascend(playerData);
     }
 }

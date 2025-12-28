@@ -30,9 +30,12 @@
         <!-- ionet 版本 -->
         <ionet.version>25.2</ionet.version>
 
+        <!-- Spring Boot 3 版本 -->
+        <spring-boot.version>3.4.1</spring-boot.version>
+
         <!-- 数据库相关 -->
         <mysql.version>8.0.33</mysql.version>
-        <mybatis-plus.version>3.5.7</mybatis-plus.version>
+        <mybatis-plus.version>3.5.9</mybatis-plus.version>
         <druid.version>1.2.23</druid.version>
 
         <!-- Redis -->
@@ -58,11 +61,32 @@
     <!-- 依赖管理 -->
     <dependencyManagement>
         <dependencies>
-            <!-- 强制统一 Netty 版本 -->
+            <!-- 强制统一 Netty 版本 (必须在 Spring Boot BOM 之前) -->
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
                 <version>${netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- 强制统一 Logback 版本 -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+
+            <!-- Spring Boot 3 BOM -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -113,6 +137,13 @@
                 <version>${ionet.version}</version>
             </dependency>
 
+            <!-- ionet Spring 集成扩展 -->
+            <dependency>
+                <groupId>com.iohao.net</groupId>
+                <artifactId>extension-spring</artifactId>
+                <version>${ionet.version}</version>
+            </dependency>
+
             <!-- ==================== 数据库 ==================== -->
             <dependency>
                 <groupId>mysql</groupId>
@@ -122,7 +153,14 @@
 
             <dependency>
                 <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+
+            <!-- MyBatis-Plus 3.5.9+ 需要单独引入 jsqlparser -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-jsqlparser</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
 

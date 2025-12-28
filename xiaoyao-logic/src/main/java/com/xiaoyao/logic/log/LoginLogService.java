@@ -5,7 +5,7 @@ import com.xiaoyao.logic.mapper.LoginLogMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.time.LocalDateTime;
 
 /**
@@ -59,26 +59,26 @@ public class LoginLogService {
                          String appVersion,
                          String clientIp) {
         try {
-            LoginLogEntity log = new LoginLogEntity();
-            log.setPlayerId(playerId);
-            log.setLoginType(loginType);
-            log.setPlatformType(platformType);
-            log.setDeviceId(deviceId != null ? deviceId : "");
-            log.setDeviceModel(deviceModel != null ? deviceModel : "");
-            log.setOsVersion(osVersion != null ? osVersion : "");
-            log.setAppVersion(appVersion != null ? appVersion : "");
-            log.setClientIp(clientIp != null ? clientIp : "");
-            log.setLoginTime(System.currentTimeMillis());
-            log.setLogoutTime(null);
-            log.setOnlineDuration(0);
-            log.setCreatedAt(LocalDateTime.now());
+            LoginLogEntity loginLogEntity = new LoginLogEntity();
+            loginLogEntity.setPlayerId(playerId);
+            loginLogEntity.setLoginType(loginType);
+            loginLogEntity.setPlatformType(platformType);
+            loginLogEntity.setDeviceId(deviceId != null ? deviceId : "");
+            loginLogEntity.setDeviceModel(deviceModel != null ? deviceModel : "");
+            loginLogEntity.setOsVersion(osVersion != null ? osVersion : "");
+            loginLogEntity.setAppVersion(appVersion != null ? appVersion : "");
+            loginLogEntity.setClientIp(clientIp != null ? clientIp : "");
+            loginLogEntity.setLoginTime(System.currentTimeMillis());
+            loginLogEntity.setLogoutTime(null);
+            loginLogEntity.setOnlineDuration(0);
+            loginLogEntity.setCreatedAt(LocalDateTime.now());
 
-            loginLogMapper.insert(log);
+            loginLogMapper.insert(loginLogEntity);
 
             log.info("[登录日志] playerId={} platform={} device={} ip={} logId={}",
-                    playerId, platformType, deviceId, clientIp, log.getId());
+                    playerId, platformType, deviceId, clientIp, loginLogEntity.getId());
 
-            return log.getId();
+            return loginLogEntity.getId();
 
         } catch (Exception e) {
             log.error("[登录日志] 记录失败 playerId={}", playerId, e);
