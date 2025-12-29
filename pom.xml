@@ -30,16 +30,12 @@
         <!-- ionet 版本 -->
         <ionet.version>25.2</ionet.version>
 
-        <!-- Spring Boot 3 版本 -->
-        <spring-boot.version>3.4.1</spring-boot.version>
+        <!-- Spring Boot 4 版本 -->
+        <spring-boot.version>4.0.0</spring-boot.version>
 
         <!-- 数据库相关 -->
         <mysql.version>8.0.33</mysql.version>
-        <mybatis-plus.version>3.5.9</mybatis-plus.version>
-        <druid.version>1.2.23</druid.version>
-
-        <!-- Redis -->
-        <redisson.version>3.34.1</redisson.version>
+        <mybatis-flex.version>1.11.5</mybatis-flex.version>
 
         <!-- 工具库 -->
         <lombok.version>1.18.42</lombok.version>
@@ -151,38 +147,13 @@
                 <version>${mysql.version}</version>
             </dependency>
 
+            <!-- MyBatis-Flex (Spring Boot 4 专用) -->
             <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-                <version>${mybatis-plus.version}</version>
+                <groupId>com.mybatis-flex</groupId>
+                <artifactId>mybatis-flex-spring-boot4-starter</artifactId>
+                <version>${mybatis-flex.version}</version>
             </dependency>
 
-            <!-- MyBatis-Plus 3.5.9+ 需要单独引入 jsqlparser -->
-            <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-jsqlparser</artifactId>
-                <version>${mybatis-plus.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>druid</artifactId>
-                <version>${druid.version}</version>
-            </dependency>
-
-            <!-- ==================== Redis ==================== -->
-            <dependency>
-                <groupId>org.redisson</groupId>
-                <artifactId>redisson</artifactId>
-                <version>${redisson.version}</version>
-                <exclusions>
-                    <!-- 排除 Redisson 自带的 Netty (4.1.x) -->
-                    <exclusion>
-                        <groupId>io.netty</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
 
             <!-- ==================== 工具库 ==================== -->
             <dependency>
@@ -208,12 +179,6 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback.version}</version>
             </dependency>
 
             <!-- ==================== 测试 ==================== -->
@@ -248,6 +213,12 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- YAML 解析 (Spring Boot 4 需要显式引入) -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -263,10 +234,17 @@
                     <encoding>UTF-8</encoding>
                     <parameters>true</parameters>
                     <annotationProcessorPaths>
+                        <!-- Lombok 注解处理器 -->
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                             <version>${lombok.version}</version>
+                        </path>
+                        <!-- MyBatis-Flex APT 注解处理器 (自动生成表定义类) -->
+                        <path>
+                            <groupId>com.mybatis-flex</groupId>
+                            <artifactId>mybatis-flex-processor</artifactId>
+                            <version>${mybatis-flex.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -305,6 +283,15 @@
             <id>aliyun</id>
             <name>Aliyun Maven</name>
             <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+        <!-- Spring Milestone 仓库 (Spring Boot 4.0.0 预览版) -->
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
         <!-- ionet 可能在 Sonatype OSSRH -->
         <repository>

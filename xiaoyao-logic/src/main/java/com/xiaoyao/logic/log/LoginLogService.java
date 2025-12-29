@@ -98,7 +98,7 @@ public class LoginLogService {
 
         try {
             // 查询登录记录
-            LoginLogEntity loginLog = loginLogMapper.selectById(logId);
+            LoginLogEntity loginLog = loginLogMapper.selectOneById(logId);
             if (loginLog == null) {
                 log.warn("[登出日志] 登录记录不存在 logId={}", logId);
                 return;

@@ -120,7 +120,7 @@ public class PetService {
         // }
 
         pet.setUpdatedBy(playerId);
-        petMapper.updateById(pet);
+        petMapper.update(pet);
 
         boolean levelChanged = !pet.getPetLevel().equals(oldLevel);
 
@@ -164,7 +164,7 @@ public class PetService {
         pet.setIsActive(GameConstants.YES);
         pet.setUpdatedBy(playerId);
 
-        petMapper.updateById(pet);
+        petMapper.update(pet);
 
         log.info("[战宠服务] 设置出战 playerId={} petId={} cfgId={}",
                 playerId, petId, pet.getPetCfgId());
@@ -191,7 +191,7 @@ public class PetService {
         pet.setIsActive(GameConstants.NO);
         pet.setUpdatedBy(playerId);
 
-        petMapper.updateById(pet);
+        petMapper.update(pet);
 
         log.info("[战宠服务] 取消出战 playerId={} petId={} cfgId={}",
                 playerId, petId, pet.getPetCfgId());
@@ -221,7 +221,7 @@ public class PetService {
         pet.setHunger(newHunger);
         pet.setUpdatedBy(playerId);
 
-        petMapper.updateById(pet);
+        petMapper.update(pet);
 
         log.info("[战宠服务] 喂养战宠 playerId={} petId={} hunger={}->{}",
                 playerId, petId, oldHunger, newHunger);
@@ -251,7 +251,7 @@ public class PetService {
         pet.setMood(newMood);
         pet.setUpdatedBy(playerId);
 
-        petMapper.updateById(pet);
+        petMapper.update(pet);
 
         log.info("[战宠服务] 提升心情 playerId={} petId={} mood={}->{}",
                 playerId, petId, oldMood, newMood);
@@ -282,7 +282,7 @@ public class PetService {
         pet.setPetName(newName);
         pet.setUpdatedBy(playerId);
 
-        petMapper.updateById(pet);
+        petMapper.update(pet);
 
         log.info("[战宠服务] 重命名战宠 playerId={} petId={} name={}",
                 playerId, petId, newName);
@@ -305,7 +305,7 @@ public class PetService {
         pet.setDeletedBy(playerId);
         pet.setDeletedAt(LocalDateTime.now());
 
-        petMapper.updateById(pet);
+        petMapper.update(pet);
 
         log.info("[战宠服务] 放生战宠 playerId={} petId={} cfgId={}",
                 playerId, petId, pet.getPetCfgId());
@@ -348,7 +348,7 @@ public class PetService {
             throw BusinessException.of(ErrorCode.PARAM_INVALID, "战宠ID无效");
         }
 
-        PetEntity pet = petMapper.selectById(petId);
+        PetEntity pet = petMapper.selectOneById(petId);
         if (pet == null || pet.getIsDeleted() == GameConstants.DELETED_YES) {
             throw BusinessException.of(ErrorCode.PET_NOT_FOUND,
                     "战宠不存在 playerId=%d petId=%d", playerId, petId);

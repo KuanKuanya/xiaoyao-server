@@ -1,6 +1,6 @@
 package com.xiaoyao.logic.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.mybatisflex.core.BaseMapper;
 import com.xiaoyao.logic.entity.DailyQuestEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

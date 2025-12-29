@@ -113,7 +113,7 @@ public class SectService {
         member.setDeletedBy(playerId); // 自己退出
         member.setDeletedAt(LocalDateTime.now());
 
-        sectMemberMapper.updateById(member);
+        sectMemberMapper.update(member);
 
         log.info("[宗门服务] 退出宗门 playerId={} sectId={} position={}",
                 playerId, member.getSectId(), member.getPosition());
@@ -160,7 +160,7 @@ public class SectService {
         target.setDeletedBy(operatorId); // 记录是谁踢出的
         target.setDeletedAt(LocalDateTime.now());
 
-        sectMemberMapper.updateById(target);
+        sectMemberMapper.update(target);
 
         log.info("[宗门服务] 踢出成员 operatorId={} targetId={} sectId={}",
                 operatorId, targetPlayerId, target.getSectId());
@@ -219,7 +219,7 @@ public class SectService {
         target.setPosition(newPosition);
         target.setUpdatedBy(operatorId);
 
-        sectMemberMapper.updateById(target);
+        sectMemberMapper.update(target);
 
         log.info("[宗门服务] 变更职位 operatorId={} targetId={} position={}->{} sectId={}",
                 operatorId, targetPlayerId, oldPosition, newPosition, target.getSectId());
@@ -252,7 +252,7 @@ public class SectService {
         member.setWeeklyContribution(member.getWeeklyContribution() + addContribution);
         member.setUpdatedBy(playerId);
 
-        sectMemberMapper.updateById(member);
+        sectMemberMapper.update(member);
 
         log.info("[宗门服务] 增加贡献度 playerId={} add={} contribution={}->{} sectId={}",
                 playerId, addContribution, oldContribution, newContribution, member.getSectId());
@@ -287,7 +287,7 @@ public class SectService {
         member.setTotalSalaryCount(member.getTotalSalaryCount() + 1);
         member.setUpdatedBy(playerId);
 
-        sectMemberMapper.updateById(member);
+        sectMemberMapper.update(member);
 
         log.info("[宗门服务] 领取俸禄 playerId={} position={} count={} sectId={}",
                 playerId, member.getPosition(), member.getTotalSalaryCount(), member.getSectId());

@@ -8,7 +8,6 @@ import com.xiaoyao.common.proto.LoginReq;
 import com.xiaoyao.common.proto.LoginResp;
 import com.xiaoyao.common.proto.PlayerData;
 import com.xiaoyao.logic.log.LoginLogService;
-import com.xiaoyao.logic.session.SessionService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -32,9 +31,6 @@ public class PlayerAction {
 
     @Resource
     private LoginLogService loginLogService;
-
-    @Resource
-    private SessionService sessionService;
 
     /**
      * 登录

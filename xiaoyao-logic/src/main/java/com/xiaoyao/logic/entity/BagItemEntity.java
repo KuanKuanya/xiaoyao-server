@@ -1,8 +1,10 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.KeyType;
 import lombok.Data;
-import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
 
 /**
  * 背包物品实体
@@ -10,11 +12,12 @@ import java.time.LocalDateTime;
  * @author xiaoyao
  */
 @Data
-@TableName("t_bag_item")
+@EqualsAndHashCode(callSuper = true)
+@Table("t_bag_item")
 public class BagItemEntity extends BaseEntity {
 
     /** 自增ID */
-    @TableId(type = IdType.AUTO)
+    @Id(keyType = KeyType.Auto)
     private Long id;
 
     /** 玩家ID */

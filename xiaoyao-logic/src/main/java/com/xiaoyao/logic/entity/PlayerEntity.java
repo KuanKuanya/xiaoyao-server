@@ -1,6 +1,8 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.KeyType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,11 +17,11 @@ import java.time.LocalDateTime;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("t_player")
+@Table("t_player")
 public class PlayerEntity extends BaseEntity {
 
     /** 玩家ID (雪花算法) */
-    @TableId(type = IdType.ASSIGN_ID)
+    @Id(keyType = KeyType.Generator, value = "snowFlakeId")
     private Long id;
 
     /** 设备ID */

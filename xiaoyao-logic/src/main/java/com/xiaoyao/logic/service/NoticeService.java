@@ -1,6 +1,6 @@
 package com.xiaoyao.logic.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xiaoyao.logic.constants.GameConstants;
 import com.xiaoyao.logic.entity.NoticeEntity;
 import com.xiaoyao.logic.exception.BusinessException;
@@ -15,6 +15,7 @@ import jakarta.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 /**
  * 公告服务
@@ -116,7 +117,7 @@ public class NoticeService {
      * @throws BusinessException 公告不存在
      */
     public NoticeEntity getNoticeById(Long noticeId) {
-        NoticeEntity notice = noticeMapper.selectById(noticeId);
+        NoticeEntity notice = noticeMapper.selectOneById(noticeId);
         if (notice == null || notice.getIsDeleted() == GameConstants.DELETED_YES) {
             throw BusinessException.of(ErrorCode.NOTICE_NOT_FOUND, "公告不存在: %d", noticeId);
         }
@@ -178,7 +179,7 @@ public class NoticeService {
         notice.setUpdatedBy(gmId);
 
         // 更新数据库
-        noticeMapper.updateById(notice);
+        noticeMapper.update(notice);
 
         log.info("[公告服务] 更新公告 id={} title={} gmId={}",
                 notice.getId(), notice.getTitle(), gmId);
@@ -202,7 +203,7 @@ public class NoticeService {
         notice.setDeletedAt(LocalDateTime.now());
 
         // 更新数据库
-        noticeMapper.updateById(notice);
+        noticeMapper.update(notice);
 
         log.info("[公告服务] 删除公告 id={} gmId={}", noticeId, gmId);
     }
@@ -214,16 +215,15 @@ public class NoticeService {
      * @return 公告列表
      */
     public List<NoticeEntity> getAllNotices(boolean includeDeleted) {
-        LambdaQueryWrapper<NoticeEntity> wrapper = new LambdaQueryWrapper<>();
+        QueryWrapper query = QueryWrapper.create();
 
         if (!includeDeleted) {
-            wrapper.eq(NoticeEntity::getIsDeleted, GameConstants.DELETED_NO);
+            query.where("is_deleted = ?", GameConstants.DELETED_NO);
         }
 
-        wrapper.orderByDesc(NoticeEntity::getPriority)
-                .orderByDesc(NoticeEntity::getCreatedAt);
+        query.orderBy("priority DESC, created_at DESC");
 
-        return noticeMapper.selectList(wrapper);
+        return noticeMapper.selectListByQuery(query);
     }
 
     // ==================== 私有辅助方法 ====================

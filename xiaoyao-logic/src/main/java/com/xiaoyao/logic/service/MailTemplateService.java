@@ -1,6 +1,6 @@
 package com.xiaoyao.logic.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xiaoyao.logic.constants.GameConstants;
 import com.xiaoyao.logic.entity.MailTemplateEntity;
 import com.xiaoyao.logic.exception.BusinessException;
@@ -15,11 +15,14 @@ import jakarta.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.xiaoyao.logic.entity.table.MailTemplateEntityTableDef.MAIL_TEMPLATE_ENTITY;
+
 /**
  * 邮件模板服务
  * 提供全服邮件模板的管理功能
  *
- * <p>扩展点说明：
+ * <p>
+ * 扩展点说明：
  * 实际的邮件发送逻辑应由外部服务实现（如MailService），
  * 本服务只负责模板的管理和状态维护
  *
@@ -36,7 +39,7 @@ public class MailTemplateService {
      * 创建邮件模板（GM使用）
      *
      * @param template 邮件模板实体
-     * @param gmId 操作的GM ID
+     * @param gmId     操作的GM ID
      * @return 模板ID
      * @throws BusinessException 参数校验失败
      */
@@ -64,7 +67,7 @@ public class MailTemplateService {
      * 注意：只有待发送状态的模板才能更新
      *
      * @param template 邮件模板实体
-     * @param gmId 操作的GM ID
+     * @param gmId     操作的GM ID
      * @throws BusinessException 模板不存在、状态不允许或参数校验失败
      */
     @Transactional(rollbackFor = Exception.class)
@@ -85,7 +88,7 @@ public class MailTemplateService {
         template.setUpdatedBy(gmId);
 
         // 更新数据库
-        mailTemplateMapper.updateById(template);
+        mailTemplateMapper.update(template);
 
         log.info("[邮件模板] 更新模板 id={} title={} gmId={}",
                 template.getId(), template.getTitle(), gmId);
@@ -96,7 +99,7 @@ public class MailTemplateService {
      * 注意：实际的邮件发送逻辑由外部服务实现
      *
      * @param templateId 模板ID
-     * @param sendCount 实际发送数量
+     * @param sendCount  实际发送数量
      * @throws BusinessException 模板不存在或状态不允许
      */
     @Transactional(rollbackFor = Exception.class)
@@ -120,7 +123,7 @@ public class MailTemplateService {
         template.setSendTime(LocalDateTime.now());
         template.setSendCount(sendCount != null ? sendCount : 0);
 
-        mailTemplateMapper.updateById(template);
+        mailTemplateMapper.update(template);
 
         log.info("[邮件模板] 标记为已发送 id={} sendCount={}", templateId, sendCount);
     }
@@ -130,7 +133,7 @@ public class MailTemplateService {
      * 注意：只有待发送状态的模板才能撤回
      *
      * @param templateId 模板ID
-     * @param gmId 操作的GM ID
+     * @param gmId       操作的GM ID
      * @throws BusinessException 模板不存在或状态不允许
      */
     @Transactional(rollbackFor = Exception.class)
@@ -148,7 +151,7 @@ public class MailTemplateService {
         template.setStatus(GameConstants.MAIL_TEMPLATE_STATUS_REVOKED);
         template.setUpdatedBy(gmId);
 
-        mailTemplateMapper.updateById(template);
+        mailTemplateMapper.update(template);
 
         log.info("[邮件模板] 撤回模板 id={} gmId={}", templateId, gmId);
     }
@@ -157,7 +160,7 @@ public class MailTemplateService {
      * 删除邮件模板（逻辑删除，GM使用）
      *
      * @param templateId 模板ID
-     * @param gmId 操作的GM ID
+     * @param gmId       操作的GM ID
      * @throws BusinessException 模板不存在
      */
     @Transactional(rollbackFor = Exception.class)
@@ -170,7 +173,7 @@ public class MailTemplateService {
         template.setDeletedBy(gmId);
         template.setDeletedAt(LocalDateTime.now());
 
-        mailTemplateMapper.updateById(template);
+        mailTemplateMapper.update(template);
 
         log.info("[邮件模板] 删除模板 id={} gmId={}", templateId, gmId);
     }
@@ -183,7 +186,7 @@ public class MailTemplateService {
      * @throws BusinessException 模板不存在
      */
     public MailTemplateEntity getTemplateById(Long templateId) {
-        MailTemplateEntity template = mailTemplateMapper.selectById(templateId);
+        MailTemplateEntity template = mailTemplateMapper.selectOneById(templateId);
         if (template == null || template.getIsDeleted() == GameConstants.DELETED_YES) {
             throw BusinessException.of(ErrorCode.MAIL_TEMPLATE_NOT_FOUND,
                     "邮件模板不存在: %d", templateId);
@@ -229,22 +232,22 @@ public class MailTemplateService {
      * @return 模板列表
      */
     public List<MailTemplateEntity> getAllTemplates(boolean includeDeleted) {
-        LambdaQueryWrapper<MailTemplateEntity> wrapper = new LambdaQueryWrapper<>();
+        QueryWrapper query = QueryWrapper.create();
 
         if (!includeDeleted) {
-            wrapper.eq(MailTemplateEntity::getIsDeleted, GameConstants.DELETED_NO);
+            query.where(MAIL_TEMPLATE_ENTITY.IS_DELETED.eq(GameConstants.DELETED_NO));
         }
 
-        wrapper.orderByDesc(MailTemplateEntity::getCreatedAt);
+        query.orderBy(MAIL_TEMPLATE_ENTITY.CREATED_AT, false);
 
-        return mailTemplateMapper.selectList(wrapper);
+        return mailTemplateMapper.selectListByQuery(query);
     }
 
     /**
      * 查询指定时间范围内的模板
      *
      * @param startTime 开始时间
-     * @param endTime 结束时间
+     * @param endTime   结束时间
      * @return 模板列表
      */
     public List<MailTemplateEntity> getTemplatesByTimeRange(LocalDateTime startTime, LocalDateTime endTime) {

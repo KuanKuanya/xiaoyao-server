@@ -105,7 +105,7 @@ public class AchievementService {
         // 检查是否完成
         boolean completed = checkAndComplete(achievement, targetProgress);
 
-        achievementMapper.updateById(achievement);
+        achievementMapper.update(achievement);
 
         log.info("[成就服务] 增加进度 playerId={} cfgId={} add={} progress={}->{} completed={}",
                 playerId, achievementCfgId, addProgress, oldProgress, newProgress, completed);
@@ -148,7 +148,7 @@ public class AchievementService {
         // 检查是否完成
         boolean completed = checkAndComplete(achievement, targetProgress);
 
-        achievementMapper.updateById(achievement);
+        achievementMapper.update(achievement);
 
         log.info("[成就服务] 设置进度 playerId={} cfgId={} progress={}->{} completed={}",
                 playerId, achievementCfgId, oldProgress, progress, completed);
@@ -191,7 +191,7 @@ public class AchievementService {
         achievement.setClaimTime(System.currentTimeMillis());
         achievement.setUpdatedBy(playerId);
 
-        achievementMapper.updateById(achievement);
+        achievementMapper.update(achievement);
 
         log.info("[成就服务] 领取奖励 playerId={} cfgId={} id={}",
                 playerId, achievementCfgId, achievement.getId());

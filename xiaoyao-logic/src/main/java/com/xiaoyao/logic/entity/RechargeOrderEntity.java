@@ -1,8 +1,8 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 /**
@@ -12,11 +12,11 @@ import lombok.Data;
  * @author xiaoyao
  */
 @Data
-@TableName("t_recharge_order")
+@Table("t_recharge_order")
 public class RechargeOrderEntity extends BaseEntity {
 
     /** 订单ID */
-    @TableId(type = IdType.AUTO)
+    @Id(keyType = KeyType.Auto)
     private Long id;
 
     /** 订单号 (唯一) */

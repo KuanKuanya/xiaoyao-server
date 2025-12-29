@@ -1,9 +1,6 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.Version;
+import com.mybatisflex.annotation.Column;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -21,53 +18,55 @@ public abstract class BaseEntity {
      * 乐观锁版本号
      * 用于防止并发更新冲突
      */
-    @Version
-    @TableField(value = "version")
+    @Column(value = "version", version = true)
     private Integer version;
 
     /**
      * 逻辑删除标志
      * 0 = 正常, 1 = 已删除
      */
-    @TableLogic
-    @TableField(value = "is_deleted")
+    @Column(value = "is_deleted", isLogicDelete = true)
     private Integer isDeleted;
 
     /**
      * 创建人ID
      * 玩家操作时为玩家ID，系统/GM操作时为操作者ID
+     * 注意: 需要在Service层手动设置
      */
-    @TableField(value = "created_by", fill = FieldFill.INSERT)
+    @Column(value = "created_by")
     private Long createdBy;
 
     /**
      * 创建时间
+     * 自动填充为数据库当前时间
      */
-    @TableField(value = "created_at", fill = FieldFill.INSERT)
+    @Column(value = "created_at", onInsertValue = "now()")
     private LocalDateTime createdAt;
 
     /**
      * 更新人ID
+     * 注意: 需要在Service层手动设置
      */
-    @TableField(value = "updated_by", fill = FieldFill.INSERT_UPDATE)
+    @Column(value = "updated_by")
     private Long updatedBy;
 
     /**
      * 更新时间
+     * 插入和更新时自动填充为数据库当前时间
      */
-    @TableField(value = "updated_at", fill = FieldFill.INSERT_UPDATE)
+    @Column(value = "updated_at", onInsertValue = "now()", onUpdateValue = "now()")
     private LocalDateTime updatedAt;
 
     /**
      * 删除人ID
      * 主动删除时记录操作者，系统删除时为0
      */
-    @TableField(value = "deleted_by")
+    @Column(value = "deleted_by")
     private Long deletedBy;
 
     /**
      * 删除时间
      */
-    @TableField(value = "deleted_at")
+    @Column(value = "deleted_at")
     private LocalDateTime deletedAt;
 }

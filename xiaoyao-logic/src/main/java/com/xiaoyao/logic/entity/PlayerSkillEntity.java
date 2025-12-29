@@ -1,6 +1,8 @@
 package com.xiaoyao.logic.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.annotation.KeyType;
 import lombok.Data;
 import java.time.LocalDateTime;
 
@@ -10,11 +12,11 @@ import java.time.LocalDateTime;
  * @author xiaoyao
  */
 @Data
-@TableName("t_player_skill")
+@Table("t_player_skill")
 public class PlayerSkillEntity extends BaseEntity {
 
     /** 自增ID */
-    @TableId(type = IdType.AUTO)
+    @Id(keyType = KeyType.Auto)
     private Long id;
 
     /** 玩家ID */

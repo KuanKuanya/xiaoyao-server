@@ -1,6 +1,6 @@
 package com.xiaoyao.logic.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.xiaoyao.logic.constants.GameConstants;
 import com.xiaoyao.logic.entity.DailyQuestEntity;
 import com.xiaoyao.logic.exception.BusinessException;
@@ -15,11 +15,14 @@ import jakarta.annotation.Resource;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.xiaoyao.logic.entity.table.DailyQuestEntityTableDef.DAILY_QUEST_ENTITY;
+
 /**
  * 每日任务服务
  * 提供每日任务的进度跟踪和奖励领取功能
  *
- * <p>扩展点说明：
+ * <p>
+ * 扩展点说明：
  * 1. 任务配置（目标进度、奖励等）应由配置管理器提供
  * 2. 实际的奖励发放应由RewardService实现
  * 3. 任务完成时可以触发回调通知其他系统
@@ -37,8 +40,8 @@ public class DailyQuestService {
      * 初始化今日任务记录
      * 一般在玩家首次访问任务系统时调用
      *
-     * @param playerId 玩家ID
-     * @param questCfgId 任务配置ID
+     * @param playerId       玩家ID
+     * @param questCfgId     任务配置ID
      * @param targetProgress 目标进度（从配置读取）
      * @return 任务实体
      */
@@ -81,9 +84,9 @@ public class DailyQuestService {
     /**
      * 增加任务进度
      *
-     * @param playerId 玩家ID
-     * @param questCfgId 任务配置ID
-     * @param addProgress 增加的进度
+     * @param playerId       玩家ID
+     * @param questCfgId     任务配置ID
+     * @param addProgress    增加的进度
      * @param targetProgress 目标进度（从配置读取）
      * @return 是否完成任务
      */
@@ -111,7 +114,7 @@ public class DailyQuestService {
         // 检查是否完成
         boolean completed = checkAndComplete(quest);
 
-        dailyQuestMapper.updateById(quest);
+        dailyQuestMapper.update(quest);
 
         log.info("[每日任务] 增加进度 playerId={} cfgId={} add={} progress={}->{} completed={}",
                 playerId, questCfgId, addProgress, oldProgress, newProgress, completed);
@@ -122,9 +125,9 @@ public class DailyQuestService {
     /**
      * 设置任务进度（绝对值）
      *
-     * @param playerId 玩家ID
-     * @param questCfgId 任务配置ID
-     * @param progress 进度值
+     * @param playerId       玩家ID
+     * @param questCfgId     任务配置ID
+     * @param progress       进度值
      * @param targetProgress 目标进度
      * @return 是否完成任务
      */
@@ -156,7 +159,7 @@ public class DailyQuestService {
         // 检查是否完成
         boolean completed = checkAndComplete(quest);
 
-        dailyQuestMapper.updateById(quest);
+        dailyQuestMapper.update(quest);
 
         log.info("[每日任务] 设置进度 playerId={} cfgId={} progress={}->{} completed={}",
                 playerId, questCfgId, oldProgress, newProgress, completed);
@@ -167,7 +170,7 @@ public class DailyQuestService {
     /**
      * 领取任务奖励
      *
-     * @param playerId 玩家ID
+     * @param playerId   玩家ID
      * @param questCfgId 任务配置ID
      * @throws BusinessException 任务不存在、未完成或已领取
      */
@@ -202,7 +205,7 @@ public class DailyQuestService {
         quest.setClaimTime(System.currentTimeMillis());
         quest.setUpdatedBy(playerId);
 
-        dailyQuestMapper.updateById(quest);
+        dailyQuestMapper.update(quest);
 
         log.info("[每日任务] 领取奖励 playerId={} cfgId={} id={}",
                 playerId, questCfgId, quest.getId());
@@ -226,7 +229,7 @@ public class DailyQuestService {
     /**
      * 查询玩家指定日期的任务
      *
-     * @param playerId 玩家ID
+     * @param playerId  玩家ID
      * @param questDate 任务日期
      * @return 任务列表
      */
@@ -241,7 +244,7 @@ public class DailyQuestService {
     /**
      * 查询玩家今日指定任务
      *
-     * @param playerId 玩家ID
+     * @param playerId   玩家ID
      * @param questCfgId 任务配置ID
      * @return 任务实体（不存在返回null）
      */
@@ -266,7 +269,7 @@ public class DailyQuestService {
         Integer completedCount = dailyQuestMapper.countCompletedByDate(playerId, today);
         Integer claimedCount = dailyQuestMapper.countClaimedByDate(playerId, today);
 
-        return new int[]{
+        return new int[] {
                 completedCount != null ? completedCount : 0,
                 claimedCount != null ? claimedCount : 0
         };
@@ -305,10 +308,10 @@ public class DailyQuestService {
             throw BusinessException.of(ErrorCode.PARAM_INVALID, "清理日期不能为空");
         }
 
-        LambdaQueryWrapper<DailyQuestEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.lt(DailyQuestEntity::getQuestDate, beforeDate);
+        QueryWrapper query = QueryWrapper.create()
+                .where(DAILY_QUEST_ENTITY.QUEST_DATE.lt(beforeDate));
 
-        int count = dailyQuestMapper.delete(wrapper);
+        int count = dailyQuestMapper.deleteByQuery(query);
 
         log.info("[每日任务] 清理过期记录 beforeDate={} count={}", beforeDate, count);
 

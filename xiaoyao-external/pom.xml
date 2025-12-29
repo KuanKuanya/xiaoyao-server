@@ -28,12 +28,6 @@
             <groupId>com.iohao.net</groupId>
             <artifactId>run-one</artifactId>
         </dependency>
-
-        <!-- Redis (Session管理) -->
-        <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson</artifactId>
-        </dependency>
     </dependencies>
 
 </project>

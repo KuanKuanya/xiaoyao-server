@@ -17,6 +17,18 @@
     <description>启动模块 - 游戏服务器启动入口</description>
 
     <dependencies>
+        <!-- Spring Boot Starter (触发自动配置) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Spring Boot JDBC (数据源自动配置) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+
         <!-- 逻辑服模块 -->
         <dependency>
             <groupId>com.xiaoyao</groupId>
@@ -33,6 +45,12 @@
         <dependency>
             <groupId>com.iohao.net</groupId>
             <artifactId>run-one</artifactId>
+        </dependency>
+
+        <!-- MyBatis-Flex (触发数据库自动配置) -->
+        <dependency>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-spring-boot4-starter</artifactId>
         </dependency>
 
         <!-- 日志实现 -->

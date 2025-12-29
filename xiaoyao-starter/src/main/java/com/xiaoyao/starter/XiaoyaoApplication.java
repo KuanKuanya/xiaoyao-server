@@ -28,7 +28,7 @@ import java.util.List;
 @Slf4j
 @SpringBootApplication
 @ComponentScan(basePackages = {
-                "com.xiaoyao.logic", // 逻辑层 (Action, Service)
+                "com.xiaoyao.logic", // 逻辑层 (Action, Service, Config)
                 "com.xiaoyao.starter" // 启动器
 })
 public class XiaoyaoApplication {
