@@ -31,6 +31,7 @@ import java.util.List;
                 "com.xiaoyao.logic", // 逻辑层 (Action, Service, Config)
                 "com.xiaoyao.starter" // 启动器
 })
+@org.mybatis.spring.annotation.MapperScan("com.xiaoyao.logic.**")
 public class XiaoyaoApplication {
 
         public static void main(String[] args) {

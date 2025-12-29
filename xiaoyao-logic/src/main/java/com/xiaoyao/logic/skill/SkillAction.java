@@ -4,7 +4,9 @@ import com.iohao.net.framework.annotations.ActionController;
 import com.iohao.net.framework.annotations.ActionMethod;
 import com.iohao.net.framework.core.flow.FlowContext;
 import com.xiaoyao.common.cmd.SkillCmd;
-import com.xiaoyao.common.proto.*;
+import com.xiaoyao.common.proto.SkillListResp;
+import com.xiaoyao.common.proto.SkillReq;
+import com.xiaoyao.common.proto.SkillResp;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -18,9 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ActionController(SkillCmd.cmd)
 public class SkillAction {
-    
+
     private final SkillService skillService = new SkillService();
-    
+
     /**
      * 获取技能列表
      */
@@ -30,7 +32,7 @@ public class SkillAction {
         log.debug("[技能] 获取列表 playerId={}", playerId);
         return skillService.getSkillList(playerId);
     }
-    
+
     /**
      * 学习技能
      */
@@ -40,7 +42,7 @@ public class SkillAction {
         log.info("[技能] 学习技能 playerId={}, skillId={}", playerId, req.getSkillId());
         return skillService.learnSkill(playerId, req.getSkillId());
     }
-    
+
     /**
      * 升级技能
      */
@@ -50,7 +52,7 @@ public class SkillAction {
         log.info("[技能] 升级技能 playerId={}, skillId={}", playerId, req.getSkillId());
         return skillService.upgradeSkill(playerId, req.getSkillId());
     }
-    
+
     /**
      * 装备技能
      */
@@ -60,7 +62,7 @@ public class SkillAction {
         log.info("[技能] 装备技能 playerId={}, skillId={}", playerId, req.getSkillId());
         return skillService.equipSkill(playerId, req.getSkillId());
     }
-    
+
     /**
      * 卸下技能
      */

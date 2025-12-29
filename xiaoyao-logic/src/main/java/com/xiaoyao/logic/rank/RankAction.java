@@ -4,11 +4,11 @@ import com.iohao.net.framework.annotations.ActionController;
 import com.iohao.net.framework.annotations.ActionMethod;
 import com.iohao.net.framework.core.flow.FlowContext;
 import com.xiaoyao.common.cmd.RankCmd;
-import com.xiaoyao.common.proto.*;
+import com.xiaoyao.common.proto.RankEntry;
+import com.xiaoyao.common.proto.RankListResp;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import jakarta.annotation.Resource;
 
 /**
  * 排行榜模块 Action

@@ -1,6 +1,7 @@
 package com.xiaoyao.common.proto;
 
 import lombok.Data;
+
 import java.util.List;
 
 /**

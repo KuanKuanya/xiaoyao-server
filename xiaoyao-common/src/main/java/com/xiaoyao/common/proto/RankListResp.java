@@ -2,6 +2,7 @@ package com.xiaoyao.common.proto;
 
 import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import lombok.Data;
+
 import java.util.List;
 
 /**

@@ -1,14 +1,13 @@
 package com.xiaoyao.logic.log;
 
-import com.xiaoyao.logic.entity.CurrencyLogEntity;
-import com.xiaoyao.logic.enums.CurrencyChangeType;
-import com.xiaoyao.logic.enums.CurrencySourceType;
-import com.xiaoyao.logic.enums.CurrencyType;
-import com.xiaoyao.logic.mapper.CurrencyLogMapper;
+
+import com.xiaoyao.logic.common.enums.CurrencyChangeType;
+import com.xiaoyao.logic.common.enums.CurrencySourceType;
+import com.xiaoyao.logic.common.enums.CurrencyType;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import java.time.LocalDateTime;
 
 /**

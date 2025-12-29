@@ -1,7 +1,6 @@
 package com.xiaoyao.common.proto;
 
 import lombok.Data;
-import java.util.Map;
 
 /**
  * 使用物品响应

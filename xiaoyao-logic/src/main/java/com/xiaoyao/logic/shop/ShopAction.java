@@ -4,7 +4,9 @@ import com.iohao.net.framework.annotations.ActionController;
 import com.iohao.net.framework.annotations.ActionMethod;
 import com.iohao.net.framework.core.flow.FlowContext;
 import com.xiaoyao.common.cmd.ShopCmd;
-import com.xiaoyao.common.proto.*;
+import com.xiaoyao.common.proto.BuyReq;
+import com.xiaoyao.common.proto.BuyResp;
+import com.xiaoyao.common.proto.ShopListResp;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -15,9 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ActionController(ShopCmd.cmd)
 public class ShopAction {
-    
+
     private final ShopService shopService = new ShopService();
-    
+
     /**
      * 获取商店列表
      */
@@ -27,18 +29,18 @@ public class ShopAction {
         log.debug("[商店] 获取列表 playerId={}", playerId);
         return shopService.getShopList(playerId);
     }
-    
+
     /**
      * 购买商品
      */
     @ActionMethod(ShopCmd.buy)
     public BuyResp buy(BuyReq req, FlowContext flowContext) {
         long playerId = flowContext.getUserId();
-        log.info("[商店] 购买 playerId={}, itemId={}, count={}", 
+        log.info("[商店] 购买 playerId={}, itemId={}, count={}",
                 playerId, req.getShopItemId(), req.getCount());
         return shopService.buy(playerId, req.getShopItemId(), req.getCount());
     }
-    
+
     /**
      * 刷新商店
      */
