@@ -3,9 +3,14 @@ package com.xiaoyao.starter;
 import com.iohao.net.app.RunOne;
 import com.iohao.net.common.kit.NetworkKit;
 import com.iohao.net.extension.spring.ActionFactoryBeanForSpring;
+import com.iohao.net.external.core.ExternalServer;
 import com.iohao.net.external.core.config.ExternalGlobalConfig;
+import com.iohao.net.external.core.hook.internal.IdleProcessSetting;
 import com.iohao.net.external.core.netty.ExternalMapper;
+import com.xiaoyao.common.cmd.PlayerCmd;
+import com.xiaoyao.logic.config.ConfigCmd;
 import com.xiaoyao.logic.HallLogicServer;
+import com.xiaoyao.starter.hook.XiaoyaoSocketIdleHook;
 import io.aeron.Aeron;
 import io.aeron.driver.MediaDriver;
 import lombok.extern.slf4j.Slf4j;
@@ -60,9 +65,12 @@ public class XiaoyaoApplication {
          * 启动 ionet 服务器
          */
         private static void startIonetServer() {
+                // 配置登录验证和路由权限
+                configureAccessAuthentication();
+
                 // 创建对外服 (WebSocket 端口 10100)
                 int port = ExternalGlobalConfig.externalPort;
-                var externalServer = ExternalMapper.builder(port).build();
+                var externalServer = createExternalServer(port);
 
                 // 创建嵌入式 Aeron MediaDriver
                 var mediaDriverCtx = new MediaDriver.Context()
@@ -85,6 +93,42 @@ public class XiaoyaoApplication {
 
                 // 打印启动完成信息
                 printStartupInfo(port);
+        }
+
+        /**
+         * 创建对外服 (WebSocket)
+         * 配置心跳检测
+         */
+        private static ExternalServer createExternalServer(int port) {
+                var builder = ExternalMapper.builder();
+                builder.setPort(port);
+
+                // 配置心跳检测
+                var idleProcessSettingBuilder = IdleProcessSetting.builder()
+                                .setIdleTime(30) // 30秒无心跳
+                                .setIdleHook(new XiaoyaoSocketIdleHook());
+
+                builder.setIdleProcessSettingBuilder(idleProcessSettingBuilder);
+
+                return builder.build();
+        }
+
+        /**
+         * 配置登录验证和路由权限
+         */
+        private static void configureAccessAuthentication() {
+                var accessAuthenticationHook = ExternalGlobalConfig.accessAuthenticationHook;
+
+                // 开启登录验证：用户必须登录后才能访问业务方法
+                accessAuthenticationHook.setVerifyIdentity(true);
+
+                // 登录接口白名单 (允许未登录访问)
+                accessAuthenticationHook.addIgnoreAuthCmd(PlayerCmd.cmd, PlayerCmd.login);
+
+                // 配置模块白名单 (允许获取配置)
+                accessAuthenticationHook.addIgnoreAuthCmd(ConfigCmd.cmd);
+
+                log.info("[权限配置] 已开启登录验证，登录接口已加入白名单");
         }
 
         /**

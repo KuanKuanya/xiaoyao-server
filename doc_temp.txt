@@ -1,4 +1,4 @@
-generate 2026-01-02 01:36:54
+generate 2026-01-02 01:56:41
 ==================== Game Document Format Description ====================
 https://iohao.github.io/ionet/docs/examples/code_generate
 
@@ -213,6 +213,10 @@ route: 29 - 2  --- 【购买商品】 --- 【ShopAction:42】【buy】
 route: 29 - 3  --- 【刷新商店】 --- 【ShopAction:53】【refresh】
     returnType: ShopListResp 
  
+==================== Other broadcast interfaces ====================
+Routing: 12 - 50  --- Broadcast: BattleResultResp 战斗结果响应，(战斗结果广播)
+Routing: 16 - 50  --- Broadcast: MailInfo 邮件信息，(新邮件通知)
+
 ==================== Error Code ====================
 -1010 : enterpriseFunction : enterpriseFunction
 -1009 : internalCommunicationError : internalCommunicationError
