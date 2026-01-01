@@ -41,6 +41,20 @@
             <artifactId>extension-spring</artifactId>
         </dependency>
 
+        <!-- ionet 代码生成 (用于生成 TypeScript SDK) -->
+        <dependency>
+            <groupId>com.iohao.net</groupId>
+            <artifactId>extension-codegen</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ionet JProtobuf 扩展 (用于生成 .proto 文件) -->
+        <dependency>
+            <groupId>com.iohao.net</groupId>
+            <artifactId>extension-jprotobuf</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- 数据库 -->
         <dependency>
             <groupId>mysql</groupId>

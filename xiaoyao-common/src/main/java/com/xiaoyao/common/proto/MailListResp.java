@@ -1,6 +1,7 @@
 package com.xiaoyao.common.proto;
 
 import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
+import com.iohao.net.extension.protobuf.ProtoFileMerge;
 import lombok.Data;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
  */
 @Data
 @ProtobufClass
+@ProtoFileMerge(fileName = XiaoyaoProtoFile.FILE_NAME, filePackage = XiaoyaoProtoFile.FILE_PACKAGE)
 public class MailListResp {
     /** 邮件列表 */
     private List<MailInfo> mails;

@@ -1,6 +1,7 @@
 package com.xiaoyao.common.proto;
 
 import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
+import com.iohao.net.extension.protobuf.ProtoFileMerge;
 import lombok.Data;
 
 /**
@@ -8,6 +9,7 @@ import lombok.Data;
  */
 @Data
 @ProtobufClass
+@ProtoFileMerge(fileName = XiaoyaoProtoFile.FILE_NAME, filePackage = XiaoyaoProtoFile.FILE_PACKAGE)
 public class ShopItem {
     /** 商品ID */
     private int id;

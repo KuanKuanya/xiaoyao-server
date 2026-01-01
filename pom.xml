@@ -141,6 +141,13 @@
                 <version>${ionet.version}</version>
             </dependency>
 
+            <!-- ionet 代码生成扩展 (生成 TypeScript/C#/GDScript SDK) -->
+            <dependency>
+                <groupId>com.iohao.net</groupId>
+                <artifactId>extension-codegen</artifactId>
+                <version>${ionet.version}</version>
+            </dependency>
+
             <!-- ==================== 数据库 ==================== -->
             <dependency>
                 <groupId>mysql</groupId>
