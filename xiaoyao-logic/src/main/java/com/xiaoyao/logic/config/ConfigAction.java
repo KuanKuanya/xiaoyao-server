@@ -2,6 +2,8 @@ package com.xiaoyao.logic.config;
 
 import com.iohao.net.framework.annotations.ActionController;
 import com.iohao.net.framework.annotations.ActionMethod;
+import com.xiaoyao.logic.config.mapper.ConfigProtoMapper;
+import com.xiaoyao.logic.config.proto.ConfigProto;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,6 +27,9 @@ public class ConfigAction {
     @Resource
     private GameConfigService configService;
 
+    @Resource
+    private ConfigProtoMapper configProtoMapper;
+
     /**
      * 获取所有境界配置
      */
@@ -34,17 +39,19 @@ public class ConfigAction {
         ConfigResp resp = new ConfigResp();
         resp.setRealms(list);
         return resp;
+        // TODO: 待重构为 Proto 对象
     }
 
     /**
      * 获取所有地图配置
+     * <p>
+     * 已重构：使用 Proto 对象和 MapStruct 映射
+     * </p>
      */
     @ActionMethod(ConfigCmd.getMaps)
-    public ConfigResp getMaps() {
+    public ConfigProto getMaps() {
         List<MapConfigVO> list = configService.getAllMapConfigVOs();
-        ConfigResp resp = new ConfigResp();
-        resp.setMaps(list);
-        return resp;
+        return configProtoMapper.createWithMaps(list);
     }
 
     /**
@@ -56,6 +63,7 @@ public class ConfigAction {
         ConfigResp resp = new ConfigResp();
         resp.setMonsters(list);
         return resp;
+        // TODO: 待重构为 Proto 对象
     }
 
     /**
@@ -67,6 +75,7 @@ public class ConfigAction {
         ConfigResp resp = new ConfigResp();
         resp.setItems(list);
         return resp;
+        // TODO: 待重构为 Proto 对象
     }
 
     /**
@@ -78,6 +87,7 @@ public class ConfigAction {
         ConfigResp resp = new ConfigResp();
         resp.setSkills(list);
         return resp;
+        // TODO: 待重构为 Proto 对象
     }
 
     /**
@@ -92,5 +102,6 @@ public class ConfigAction {
         resp.setItems(configService.getAllItemConfigs());
         resp.setSkills(configService.getAllSkillConfigs());
         return resp;
+        // TODO: 待重构为 Proto 对象
     }
 }
