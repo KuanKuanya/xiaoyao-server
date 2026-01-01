@@ -5,6 +5,10 @@ import com.xiaoyao.common.error.RealmError;
 import com.xiaoyao.common.proto.BreakthroughResp;
 import com.xiaoyao.common.proto.CultivateResp;
 import com.xiaoyao.common.proto.PlayerData;
+import com.xiaoyao.logic.config.GameConfigService;
+import com.xiaoyao.logic.config.RealmConfigEntity;
+import com.xiaoyao.logic.player.PlayerService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +23,12 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class RealmService {
+
+    @Resource
+    private PlayerService playerService;
+
+    @Resource
+    private GameConfigService configService;
 
     /** 最大境界数量 */
     private static final int MAX_REALM = 108;
@@ -39,9 +49,9 @@ public class RealmService {
         // 计算挂机时长 (秒)
         long duration = Math.max(0, (now - lastTime) / 1000);
 
-        // 根据境界计算经验倍率
+        // 根据境界配置获取经验倍率
         int realmId = playerData.getRealmId();
-        double expRate = 1.0 + (realmId - 1) * 0.1; // 每个境界增加10%经验
+        double expRate = configService.getExpRate(realmId);
 
         // 计算获得的经验
         long expGain = (long) (duration * BASE_EXP_PER_SECOND * expRate);
@@ -50,6 +60,9 @@ public class RealmService {
         long newExp = playerData.getRealmExp() + expGain;
         playerData.setRealmExp(newExp);
         playerData.setLastCultivateTime(now);
+
+        // 保存到数据库
+        playerService.saveProgress(playerData.getPlayerId(), playerData);
 
         // 构建响应
         CultivateResp resp = new CultivateResp();
@@ -93,9 +106,9 @@ public class RealmService {
         playerData.setRealmExp(playerData.getRealmExp() - requiredExp);
 
         // 计算属性加成
-        int atkBonus = getAtkBonus(newRealmId);
-        int defBonus = getDefBonus(newRealmId);
-        int hpBonus = getHpBonus(newRealmId);
+        long atkBonus = getAtkBonus(newRealmId);
+        long defBonus = getDefBonus(newRealmId);
+        long hpBonus = getHpBonus(newRealmId);
 
         // 更新战斗力
         long newCombatPower = calculateCombatPower(playerData);
@@ -172,53 +185,38 @@ public class RealmService {
      * 获取境界名称
      */
     public String getRealmName(int realmId) {
-        // 大境界
-        String[] majorRealms = {
-                "练气", "筑基", "金丹", "元婴", "化神",
-                "炼虚", "合体", "大乘", "渡劫",
-                "地仙", "天仙", "金仙", "太乙金仙", "大罗金仙"
-        };
-
-        // 小境界
-        String[] minorRealms = { "一层", "二层", "三层", "四层", "五层", "六层", "七层", "八层", "九层", "圆满" };
-
-        int majorIndex = (realmId - 1) / 10;
-        int minorIndex = (realmId - 1) % 10;
-
-        if (majorIndex >= majorRealms.length) {
-            return "大罗金仙·圆满";
-        }
-
-        return majorRealms[majorIndex] + "期·" + minorRealms[minorIndex];
+        return configService.getRealmName(realmId);
     }
 
     /**
      * 获取突破所需经验
      */
     private long getRequiredExp(int realmId) {
-        // 指数增长公式
-        return (long) (100 * Math.pow(1.5, realmId - 1));
+        return configService.getRequiredExp(realmId);
     }
 
     /**
      * 获取攻击力加成
      */
-    private int getAtkBonus(int realmId) {
-        return realmId * 10;
+    private long getAtkBonus(int realmId) {
+        RealmConfigEntity cfg = configService.getRealmConfig(realmId);
+        return cfg != null ? cfg.getBaseAtk() : realmId * 10L;
     }
 
     /**
      * 获取防御力加成
      */
-    private int getDefBonus(int realmId) {
-        return realmId * 5;
+    private long getDefBonus(int realmId) {
+        RealmConfigEntity cfg = configService.getRealmConfig(realmId);
+        return cfg != null ? cfg.getBaseDef() : realmId * 5L;
     }
 
     /**
      * 获取生命值加成
      */
-    private int getHpBonus(int realmId) {
-        return realmId * 50;
+    private long getHpBonus(int realmId) {
+        RealmConfigEntity cfg = configService.getRealmConfig(realmId);
+        return cfg != null ? cfg.getBaseHp() : realmId * 50L;
     }
 
     /**
@@ -226,9 +224,9 @@ public class RealmService {
      */
     private long calculateCombatPower(PlayerData playerData) {
         int realmId = playerData.getRealmId();
-        int atk = getAtkBonus(realmId);
-        int def = getDefBonus(realmId);
-        int hp = getHpBonus(realmId);
+        long atk = getAtkBonus(realmId);
+        long def = getDefBonus(realmId);
+        long hp = getHpBonus(realmId);
 
         return (long) (atk * 2 + def * 1.5 + hp * 0.5);
     }

@@ -8,6 +8,7 @@ import com.xiaoyao.common.proto.SkillListResp;
 import com.xiaoyao.common.proto.SkillReq;
 import com.xiaoyao.common.proto.SkillResp;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 /**
  * 技能模块 Action
@@ -18,10 +19,12 @@ import lombok.extern.slf4j.Slf4j;
  * @author xiaoyao
  */
 @Slf4j
+@Component
 @ActionController(SkillCmd.cmd)
 public class SkillAction {
 
-    private final SkillService skillService = new SkillService();
+    @jakarta.annotation.Resource
+    private SkillService skillService;
 
     /**
      * 获取技能列表

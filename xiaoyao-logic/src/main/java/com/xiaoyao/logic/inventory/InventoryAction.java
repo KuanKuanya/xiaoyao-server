@@ -16,10 +16,12 @@ import lombok.extern.slf4j.Slf4j;
  * @author xiaoyao
  */
 @Slf4j
+@org.springframework.stereotype.Component
 @ActionController(InventoryCmd.cmd)
 public class InventoryAction {
 
-    private final InventoryService inventoryService = new InventoryService();
+    @jakarta.annotation.Resource
+    private InventoryService inventoryService;
 
     /**
      * 获取背包列表
@@ -38,7 +40,7 @@ public class InventoryAction {
     /**
      * 使用物品
      *
-     * @param req 使用请求
+     * @param req         使用请求
      * @param flowContext 请求上下文
      * @return 使用结果
      */
@@ -54,7 +56,7 @@ public class InventoryAction {
     /**
      * 穿戴装备
      *
-     * @param req 装备请求
+     * @param req         装备请求
      * @param flowContext 请求上下文
      * @return 装备结果
      */
@@ -69,7 +71,7 @@ public class InventoryAction {
     /**
      * 卸下装备
      *
-     * @param req 装备请求 (用slot表示槽位)
+     * @param req         装备请求 (用slot表示槽位)
      * @param flowContext 请求上下文
      * @return 卸下结果
      */

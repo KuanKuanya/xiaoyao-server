@@ -8,6 +8,7 @@ import com.xiaoyao.common.proto.BattleResultResp;
 import com.xiaoyao.common.proto.IdleRewardResp;
 import com.xiaoyao.common.proto.StartBattleReq;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 /**
  * 战斗模块 Action
@@ -18,15 +19,17 @@ import lombok.extern.slf4j.Slf4j;
  * @author xiaoyao
  */
 @Slf4j
+@Component
 @ActionController(CombatCmd.cmd)
 public class CombatAction {
 
-    private final CombatService combatService = new CombatService();
+    @jakarta.annotation.Resource
+    private CombatService combatService;
 
     /**
      * 开始战斗
      *
-     * @param req 战斗请求
+     * @param req         战斗请求
      * @param flowContext 请求上下文
      * @return 战斗结果
      */
@@ -41,7 +44,7 @@ public class CombatAction {
     /**
      * 开始挂机战斗
      *
-     * @param req 战斗请求
+     * @param req         战斗请求
      * @param flowContext 请求上下文
      * @return 是否成功
      */

@@ -18,7 +18,7 @@ public class BattleResultResp {
     /** 获得经验 */
     private long expGained;
     /** 获得灵石 */
-    private int stonesGained;
+    private long stonesGained;
     /** 掉落物品 */
     private List<BagItem> drops;
     /** 玩家剩余血量比例 */

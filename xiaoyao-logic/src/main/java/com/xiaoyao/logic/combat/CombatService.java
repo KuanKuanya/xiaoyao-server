@@ -4,10 +4,18 @@ import com.xiaoyao.common.proto.BagItem;
 import com.xiaoyao.common.proto.BattleResultResp;
 import com.xiaoyao.common.proto.EnemyInfo;
 import com.xiaoyao.common.proto.IdleRewardResp;
+import com.xiaoyao.logic.config.DropConfigEntity;
+import com.xiaoyao.logic.config.GameConfigService;
+import com.xiaoyao.logic.config.MapMonsterConfigEntity;
+import com.xiaoyao.logic.config.MonsterConfigEntity;
 import com.xiaoyao.logic.inventory.InventoryService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 战斗服务
@@ -15,22 +23,16 @@ import java.util.*;
  * @author xiaoyao
  */
 @Slf4j
+@Service
 public class CombatService {
 
-    /** 敌人名称前缀 */
-    private static final String[] ENEMY_PREFIX = {"小", "大", "妖", "凶", "狂", "魔"};
-
-    /** 敌人类型 */
-    private static final String[] ENEMY_TYPES = {"兔", "狼", "虎", "熊", "蛇", "龙", "凤"};
-
-    /** 敌人图标 */
-    private static final String[] ENEMY_ICONS = {"🐰", "🐺", "🐯", "🐻", "🐍", "🐲", "🦅"};
+    @Resource
+    private InventoryService inventoryService;
+    @Resource
+    private GameConfigService configService;
 
     /** 玩家挂机状态 */
-    private static final Map<Long, IdleBattleState> playerIdleStates = new HashMap<>();
-
-    private final InventoryService inventoryService = new InventoryService();
-    private final Random random = new Random();
+    private final Map<Long, IdleBattleState> playerIdleStates = new ConcurrentHashMap<>();
 
     /**
      * 开始战斗
@@ -38,39 +40,44 @@ public class CombatService {
     public BattleResultResp startBattle(long playerId, int mapId) {
         BattleResultResp resp = new BattleResultResp();
 
-        // 生成敌人
+        // 1. 生成敌人
         EnemyInfo enemy = generateEnemy(mapId);
+        if (enemy == null) {
+            log.warn("地图没有配置怪物: mapId={}", mapId);
+            // 降级逻辑: 如果没有配置怪物，生成一个临时的
+            enemy = generateFallbackEnemy(mapId);
+        }
         resp.setEnemy(enemy);
 
-        // TODO: 获取玩家属性，执行战斗逻辑
-        // 这里简化为随机胜负
-        boolean victory = random.nextFloat() > 0.2f;  // 80%胜率
+        // 2. 战斗计算 (简化版: 80%胜率)
+        boolean victory = ThreadLocalRandom.current().nextFloat() > 0.2f;
         resp.setVictory(victory);
-        resp.setRounds(random.nextInt(10) + 1);
-        resp.setPlayerHpPercent(victory ? random.nextFloat() * 0.5f + 0.5f : 0);
+        resp.setRounds(ThreadLocalRandom.current().nextInt(10) + 1);
+        resp.setPlayerHpPercent(victory ? ThreadLocalRandom.current().nextFloat() * 0.5f + 0.5f : 0);
 
         if (victory) {
-            // 计算奖励
-            int baseExp = 50 + mapId * 10;
-            int baseStones = 10 + mapId * 2;
+            // 3. 计算奖励
+            long expGained = enemy.getExpReward();
+            long stonesGained = enemy.getStoneReward();
 
-            resp.setExpGained(baseExp + random.nextInt(baseExp / 2));
-            resp.setStonesGained(baseStones + random.nextInt(baseStones / 2));
+            // 浮动 90% - 110%
+            float floatRate = 0.9f + ThreadLocalRandom.current().nextFloat() * 0.2f;
+            expGained = (long) (expGained * floatRate);
+            stonesGained = (long) (stonesGained * floatRate);
 
-            // 随机掉落
-            List<BagItem> drops = new ArrayList<>();
-            if (random.nextFloat() < 0.3f) {  // 30%掉落
-                BagItem drop = new BagItem();
-                drop.setItemId(101 + random.nextInt(5));  // 随机物品
-                drop.setCount(1);
-                drops.add(drop);
+            resp.setExpGained(expGained);
+            resp.setStonesGained(stonesGained);
 
-                // 添加到背包
-                inventoryService.addItem(playerId, drop.getItemId(), drop.getCount());
-            }
+            // 4. 计算掉落
+            List<BagItem> drops = calculateDrops(mapId, enemy.getEnemyId());
             resp.setDrops(drops);
 
-            // TODO: 更新玩家经验和灵石
+            // 发放掉落物品
+            for (BagItem item : drops) {
+                inventoryService.addItem(playerId, item.getItemId(), item.getCount());
+            }
+
+            // TODO: 发放经验和灵石 (需调用 PlayerService)
         }
 
         return resp;
@@ -81,7 +88,7 @@ public class CombatService {
      */
     public boolean startIdleBattle(long playerId, int mapId) {
         IdleBattleState state = new IdleBattleState();
-        state.playerId = playerId;
+
         state.mapId = mapId;
         state.startTime = System.currentTimeMillis();
         state.isActive = true;
@@ -120,71 +127,172 @@ public class CombatService {
 
         // 每10秒一场战斗
         int battleCount = seconds / 10;
-        int victoryCount = (int) (battleCount * 0.8f);  // 80%胜率
+        int victoryCount = (int) (battleCount * 0.8f);
 
         resp.setBattleCount(battleCount);
         resp.setVictoryCount(victoryCount);
 
-        // 计算奖励
-        int expPerBattle = 50 + state.mapId * 10;
-        int stonesPerBattle = 10 + state.mapId * 2;
+        // 获取地图参考怪物
+        EnemyInfo refEnemy = generateEnemy(state.mapId);
+        if (refEnemy == null)
+            refEnemy = generateFallbackEnemy(state.mapId);
 
-        resp.setTotalExp((long) victoryCount * expPerBattle);
+        // 计算总奖励
+        long expPerBattle = refEnemy.getExpReward();
+        long stonesPerBattle = refEnemy.getStoneReward();
+
+        resp.setTotalExp(victoryCount * expPerBattle);
         resp.setTotalStones(victoryCount * stonesPerBattle);
 
-        // 随机掉落
-        List<BagItem> drops = new ArrayList<>();
-        int dropCount = victoryCount / 10;  // 每10场掉落1个
-        for (int i = 0; i < dropCount; i++) {
-            BagItem drop = new BagItem();
-            drop.setItemId(101 + random.nextInt(5));
-            drop.setCount(1);
-            drops.add(drop);
-            inventoryService.addItem(playerId, drop.getItemId(), 1);
+        // 计算总掉落
+        // 挂机掉率降低: 为单次战斗的 20%
+        List<BagItem> allDrops = new ArrayList<>();
+        // 为了性能，不模拟每一场，而是按批次计算
+        // 比如 dropCount = victoryCount / 5;
+        // 这里简单处理: 模拟 1/5 场次的掉落判定
+        int dropRolls = victoryCount / 5;
+        if (dropRolls > 0) {
+            // 合并掉落
+            Map<Integer, Integer> dropMap = new HashMap<>();
+
+            // 地图掉落配置
+            List<DropConfigEntity> mapDropConfigs = configService.getMapDrops(state.mapId);
+
+            for (int i = 0; i < dropRolls; i++) {
+                Map<Integer, Integer> roundDrops = configService.calculateDrops(mapDropConfigs);
+                roundDrops.forEach((itemId, count) -> dropMap.merge(itemId, count, (a, b) -> a + b));
+            }
+
+            dropMap.forEach((itemId, count) -> {
+                BagItem item = new BagItem();
+                item.setItemId(itemId);
+                item.setCount(count);
+                allDrops.add(item);
+                inventoryService.addItem(playerId, itemId, count);
+            });
         }
-        resp.setDrops(drops);
+
+        resp.setDrops(allDrops);
 
         // 清除状态
         playerIdleStates.remove(playerId);
 
-        // TODO: 更新玩家数据
+        // TODO: 发放经验和灵石
 
         return resp;
     }
 
     /**
-     * 生成敌人
+     * 根据配置生成怪物
      */
     private EnemyInfo generateEnemy(int mapId) {
+        List<MapMonsterConfigEntity> mapMonsters = configService.getMapMonsters(mapId);
+        if (mapMonsters == null || mapMonsters.isEmpty()) {
+            return null;
+        }
+
+        // 简单的随机权重算法
+        int totalWeight = mapMonsters.stream().mapToInt(MapMonsterConfigEntity::getSpawnRate).sum();
+        int roll = ThreadLocalRandom.current().nextInt(totalWeight);
+        int current = 0;
+
+        MonsterConfigEntity targetInput = null;
+        for (MapMonsterConfigEntity mm : mapMonsters) {
+            current += mm.getSpawnRate();
+            if (roll < current) {
+                targetInput = configService.getMonsterConfig(mm.getMonsterId());
+                break;
+            }
+        }
+
+        if (targetInput == null) {
+            // Should not happen if weights are correct
+            targetInput = configService.getMonsterConfig(mapMonsters.get(0).getMonsterId());
+        }
+
+        return convertToEnemyInfo(targetInput);
+    }
+
+    private EnemyInfo convertToEnemyInfo(MonsterConfigEntity config) {
+        if (config == null)
+            return null;
+
+        EnemyInfo info = new EnemyInfo();
+        info.setEnemyId(config.getId());
+        info.setName(config.getName());
+        info.setLevel(config.getRealmLevel());
+        info.setMaxHp(config.getBaseHp());
+        info.setHp(config.getBaseHp());
+        info.setAtk(config.getBaseAtk());
+        info.setDef(config.getBaseDef());
+        info.setSpeed(100); // 基础速度
+        info.setIcon(config.getIcon() != null ? config.getIcon() : "👹");
+
+        // 奖励预览
+        info.setExpReward(config.getExpReward());
+        info.setStoneReward(config.getStoneReward());
+
+        return info;
+    }
+
+    /**
+     * 降级怪物生成 (当没有配置时)
+     */
+    private EnemyInfo generateFallbackEnemy(int mapId) {
         EnemyInfo enemy = new EnemyInfo();
-
-        int typeIndex = random.nextInt(ENEMY_TYPES.length);
-        String prefix = ENEMY_PREFIX[random.nextInt(ENEMY_PREFIX.length)];
-
-        enemy.setEnemyId(System.currentTimeMillis());
-        enemy.setName(prefix + ENEMY_TYPES[typeIndex]);
-        enemy.setIcon(ENEMY_ICONS[typeIndex]);
+        enemy.setEnemyId(-1);
+        enemy.setName("未知怪物");
+        enemy.setIcon("👻");
         enemy.setLevel(mapId);
 
-        // 基于地图等级计算属性
-        int baseHp = 100 + mapId * 50;
-        int baseAtk = 10 + mapId * 5;
-        int baseDef = 5 + mapId * 3;
+        long baseHp = 100 + mapId * 50L;
+        long baseAtk = 10 + mapId * 5L;
+        long baseDef = 5 + mapId * 3L;
 
         enemy.setMaxHp(baseHp);
         enemy.setHp(baseHp);
         enemy.setAtk(baseAtk);
         enemy.setDef(baseDef);
-        enemy.setSpeed(100 + random.nextInt(20));
+        enemy.setExpReward(50 + mapId * 10L);
+        enemy.setStoneReward(10 + mapId * 2L);
 
         return enemy;
+    }
+
+    /**
+     * 计算掉落
+     */
+    private List<BagItem> calculateDrops(int mapId, long monsterId) {
+        List<BagItem> drops = new ArrayList<>();
+        Map<Integer, Integer> dropMap = new HashMap<>();
+
+        // 1. 地图掉落
+        List<DropConfigEntity> mapDrops = configService.getMapDrops(mapId);
+        Map<Integer, Integer> mapDropResult = configService.calculateDrops(mapDrops);
+        mapDropResult.forEach((k, v) -> dropMap.merge(k, v, Integer::sum));
+
+        // 2. 怪物掉落 (如果有)
+        // monsterId 此时是 configId
+        if (monsterId > 0) {
+            List<DropConfigEntity> monsterDrops = configService.getMonsterDrops((int) monsterId);
+            Map<Integer, Integer> monsterDropResult = configService.calculateDrops(monsterDrops);
+            monsterDropResult.forEach((k, v) -> dropMap.merge(k, v, Integer::sum));
+        }
+
+        dropMap.forEach((itemId, count) -> {
+            BagItem item = new BagItem();
+            item.setItemId(itemId);
+            item.setCount(count);
+            drops.add(item);
+        });
+
+        return drops;
     }
 
     /**
      * 挂机状态
      */
     private static class IdleBattleState {
-        long playerId;
         int mapId;
         long startTime;
         boolean isActive;

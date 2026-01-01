@@ -18,7 +18,7 @@ public class IdleRewardResp {
     /** 获得总经验 */
     private long totalExp;
     /** 获得总灵石 */
-    private int totalStones;
+    private long totalStones;
     /** 掉落物品 */
     private List<BagItem> drops;
 }
