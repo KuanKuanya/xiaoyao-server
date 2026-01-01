@@ -1,5 +1,6 @@
 package com.xiaoyao.logic.mail;
 
+import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Table("t_mail")
+@ProtobufClass
 public class MailEntity extends BaseEntity {
 
     /** 邮件ID */

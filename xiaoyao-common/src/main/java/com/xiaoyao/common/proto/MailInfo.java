@@ -1,5 +1,6 @@
 package com.xiaoyao.common.proto;
 
+import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import lombok.Data;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
  * 邮件信息
  */
 @Data
+@ProtobufClass
 public class MailInfo {
     /** 邮件ID */
     private long mailId;

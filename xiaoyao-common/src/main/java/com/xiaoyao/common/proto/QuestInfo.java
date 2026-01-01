@@ -1,5 +1,6 @@
 package com.xiaoyao.common.proto;
 
+import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import lombok.Data;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
  * 任务信息
  */
 @Data
+@ProtobufClass
 public class QuestInfo {
     /** 任务ID */
     private int questId;

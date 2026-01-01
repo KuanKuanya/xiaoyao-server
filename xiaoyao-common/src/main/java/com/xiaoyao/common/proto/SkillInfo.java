@@ -1,11 +1,13 @@
 package com.xiaoyao.common.proto;
 
+import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import lombok.Data;
 
 /**
  * 技能信息
  */
 @Data
+@ProtobufClass
 public class SkillInfo {
     /** 技能ID */
     private int skillId;

@@ -4,6 +4,8 @@ import com.xiaoyao.common.proto.BuyResp;
 import com.xiaoyao.common.proto.ShopItem;
 import com.xiaoyao.common.proto.ShopListResp;
 import com.xiaoyao.logic.inventory.InventoryService;
+import org.springframework.stereotype.Service;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -18,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author xiaoyao
  */
 @Slf4j
+@Service
 public class ShopService {
 
     /** 商店商品配置 */
@@ -26,7 +29,8 @@ public class ShopService {
     /** 玩家购买记录 */
     private static final Map<Long, Map<Integer, Integer>> PLAYER_BUY_RECORDS = new ConcurrentHashMap<>();
 
-    private final InventoryService inventoryService = new InventoryService();
+    @Resource
+    private InventoryService inventoryService;
 
     static {
         // 初始化商店配置
@@ -35,17 +39,17 @@ public class ShopService {
 
     private static void initShopConfig() {
         // 普通商品
-        addShopItem(1, 101, 1, 100, 1, 0);        // 小还丹 100灵石
-        addShopItem(2, 102, 1, 500, 1, 0);        // 中还丹 500灵石
-        addShopItem(3, 103, 1, 2000, 1, 0);       // 大还丹 2000灵石
+        addShopItem(1, 101, 1, 100, 1, 0); // 小还丹 100灵石
+        addShopItem(2, 102, 1, 500, 1, 0); // 中还丹 500灵石
+        addShopItem(3, 103, 1, 2000, 1, 0); // 大还丹 2000灵石
 
         // 限购商品
-        addShopItem(10, 201, 1, 50, 2, 5);        // 初级武器 50仙玉 限购5
-        addShopItem(11, 202, 1, 100, 2, 3);       // 中级武器 100仙玉 限购3
+        addShopItem(10, 201, 1, 50, 2, 5); // 初级武器 50仙玉 限购5
+        addShopItem(11, 202, 1, 100, 2, 3); // 中级武器 100仙玉 限购3
 
         // 功法书
-        addShopItem(20, 1001, 1, 1000, 1, 1);     // 基础剑法 限购1
-        addShopItem(21, 1002, 1, 2000, 1, 1);     // 火球术 限购1
+        addShopItem(20, 1001, 1, 1000, 1, 1); // 基础剑法 限购1
+        addShopItem(21, 1002, 1, 2000, 1, 1); // 火球术 限购1
     }
 
     private static void addShopItem(int id, int itemId, int count, int price, int currencyType, int limit) {

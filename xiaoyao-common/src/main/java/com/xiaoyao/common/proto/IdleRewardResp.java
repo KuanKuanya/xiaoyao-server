@@ -1,5 +1,6 @@
 package com.xiaoyao.common.proto;
 
+import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import lombok.Data;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
  * 挂机奖励响应
  */
 @Data
+@ProtobufClass
 public class IdleRewardResp {
     /** 挂机时长 (秒) */
     private int idleSeconds;

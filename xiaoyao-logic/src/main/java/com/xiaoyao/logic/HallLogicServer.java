@@ -7,6 +7,15 @@ import com.iohao.net.server.LogicServer;
 import com.xiaoyao.logic.player.PlayerAction;
 import com.xiaoyao.logic.rank.RankAction;
 import com.xiaoyao.logic.realm.RealmAction;
+import com.xiaoyao.logic.combat.CombatAction;
+import com.xiaoyao.logic.inventory.InventoryAction;
+import com.xiaoyao.logic.skill.SkillAction;
+import com.xiaoyao.logic.config.ConfigAction;
+import com.xiaoyao.logic.shop.ShopAction;
+import com.xiaoyao.logic.quest.QuestAction;
+import com.xiaoyao.logic.pet.PetAction;
+import com.xiaoyao.logic.mail.MailAction;
+import com.xiaoyao.logic.sect.SectAction;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -26,13 +35,22 @@ public class HallLogicServer implements LogicServer {
         builder.scanActionPackage(PlayerAction.class);
         builder.scanActionPackage(RealmAction.class);
         builder.scanActionPackage(RankAction.class);
-        
+        builder.scanActionPackage(CombatAction.class);
+        builder.scanActionPackage(InventoryAction.class);
+        builder.scanActionPackage(SkillAction.class);
+        builder.scanActionPackage(ConfigAction.class);
+        builder.scanActionPackage(ShopAction.class);
+        builder.scanActionPackage(QuestAction.class);
+        builder.scanActionPackage(PetAction.class);
+        builder.scanActionPackage(MailAction.class);
+        builder.scanActionPackage(SectAction.class);
+
         // 添加调试插件 (生产环境可关闭)
         builder.addInOut(new DebugInOut());
-        
+
         log.info("[逻辑服] 业务框架配置完成");
     }
-    
+
     @Override
     public void settingServerBuilder(ServerBuilder builder) {
         // 设置逻辑服名称

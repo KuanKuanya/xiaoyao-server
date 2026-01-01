@@ -1,11 +1,13 @@
 package com.xiaoyao.common.proto;
 
+import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import lombok.Data;
 
 /**
  * 敌人信息
  */
 @Data
+@ProtobufClass
 public class EnemyInfo {
     /** 敌人ID */
     private long enemyId;

@@ -1,5 +1,6 @@
 package com.xiaoyao.logic.sect;
 
+import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
@@ -16,6 +17,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table("t_sect_member")
+@ProtobufClass
 public class SectMemberEntity extends BaseEntity {
 
     /**

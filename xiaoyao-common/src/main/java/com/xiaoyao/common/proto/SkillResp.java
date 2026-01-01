@@ -1,11 +1,13 @@
 package com.xiaoyao.common.proto;
 
+import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import lombok.Data;
 
 /**
  * 技能操作响应
  */
 @Data
+@ProtobufClass
 public class SkillResp {
     /** 是否成功 */
     private boolean success;

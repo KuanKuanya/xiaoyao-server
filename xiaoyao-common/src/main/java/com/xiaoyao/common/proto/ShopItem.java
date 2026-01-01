@@ -1,11 +1,13 @@
 package com.xiaoyao.common.proto;
 
+import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import lombok.Data;
 
 /**
  * 商店商品
  */
 @Data
+@ProtobufClass
 public class ShopItem {
     /** 商品ID */
     private int id;

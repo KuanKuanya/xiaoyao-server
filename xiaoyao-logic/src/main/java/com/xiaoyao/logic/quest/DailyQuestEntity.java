@@ -1,5 +1,6 @@
 package com.xiaoyao.logic.quest;
 
+import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table("t_daily_quest")
+@ProtobufClass
 public class DailyQuestEntity extends BaseEntity {
 
     /**

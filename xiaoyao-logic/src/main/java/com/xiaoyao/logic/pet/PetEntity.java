@@ -1,5 +1,6 @@
 package com.xiaoyao.logic.pet;
 
+import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
@@ -16,6 +17,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table("t_pet")
+@ProtobufClass
 public class PetEntity extends BaseEntity {
 
     /**

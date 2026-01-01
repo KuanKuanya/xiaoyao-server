@@ -9,16 +9,21 @@ import com.xiaoyao.common.proto.BuyResp;
 import com.xiaoyao.common.proto.ShopListResp;
 import lombok.extern.slf4j.Slf4j;
 
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
+
 /**
  * 商店模块 Action
  *
  * @author xiaoyao
  */
 @Slf4j
+@Component
 @ActionController(ShopCmd.cmd)
 public class ShopAction {
 
-    private final ShopService shopService = new ShopService();
+    @Resource
+    private ShopService shopService;
 
     /**
      * 获取商店列表

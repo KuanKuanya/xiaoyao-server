@@ -1,5 +1,6 @@
 package com.xiaoyao.common.proto;
 
+import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
 import lombok.Data;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
  * 战斗结果响应
  */
 @Data
+@ProtobufClass
 public class BattleResultResp {
     /** 是否胜利 */
     private boolean victory;
