@@ -56,7 +56,7 @@ public final class GenerateTest {
         DocumentHelper.generateDocument();
 
         // 生成 .proto 协议文件
-        generateProtoFile();
+        // generateProtoFile();
 
         log.info("========================================");
         log.info("代码生成完成！");
@@ -97,5 +97,13 @@ public final class GenerateTest {
 
         protoGenerateFile.generate();
         log.info("[GenerateTest] 将生成 .proto 文件到: {}", PROTO_PATH);
+    }
+
+    /**
+     * JUnit 测试入口
+     */
+    @org.junit.jupiter.api.Test
+    public void testGenerate() {
+        main(null);
     }
 }

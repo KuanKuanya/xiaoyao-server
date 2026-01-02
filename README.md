@@ -111,7 +111,7 @@ public class YourAction {
 }
 ```
 
-4. 在 `HallLogicServer.java` 中添加 Action 扫描
+1. 在 `HallLogicServer.java` 中添加 Action 扫描
 
 ### 错误处理
 
@@ -123,6 +123,56 @@ PlayerError.PLAYER_NOT_FOUND.assertNonNull(player);
 
 // 或抛出异常
 throw new MessageException(PlayerError.PLAYER_NOT_FOUND);
+```
+
+## 进阶开发指南
+
+### 1. 前端 SDK 代码生成
+
+本项目支持自动生成前端通信 SDK（TypeScript + Protobuf）。
+
+**步骤：**
+
+1. **生成接口与协议**：
+   在 IntelliJ IDEA 中运行 `xiaoyao-logic/src/test/java/com/xiaoyao/logic/GenerateTest.java` 的 `main` 方法。
+   - 生成 TS 接口定义：`game-xiuxian/src/gen/code`
+   - 生成 .proto 文件：`game-xiuxian/proto`
+
+2. **编译 Protobuf**：
+   在前端目录 `game-xiuxian/` 下运行：
+
+   ```bash
+   npx buf generate
+   ```
+
+   这将把 `.proto` 文件编译为 TypeScript 类型定义。
+
+### 2. 接口权限控制
+
+所有业务接口默认开启登录验证。如需开放未登录访问（如登录、注册、配置获取），需配置白名单。
+
+**配置位置**：`xiaoyao-starter/.../XiaoyaoApplication.java` -> `configureAccessAuthentication`
+
+```java
+// 示例：允许 Player 模块的 Login 接口
+accessAuthenticationHook.addIgnoreAuthCmd(PlayerCmd.cmd, PlayerCmd.login);
+```
+
+### 3. 服务器广播 (Push)
+
+向客户端主动推送消息（如战斗结束、新邮件）。
+
+**配置步骤**：
+
+1. 定义广播命令：推荐使用 `50` 左右的 subCmd (避免冲突和越界)。
+2. 注册广播文档：在 `HallLogicServer.java` -> `configureBroadcastDocuments` 中注册。
+   - **注意**：必须注册后，GenerateTest 才会生成对应的前端监听代码。
+
+```java
+// 示例
+builder.addBroadcastDocument(BroadcastDocument.builder(CmdInfo.of(MyCmd.cmd, MyCmd.BROADCAST_MSG))
+    .setDataClass(MyResp.class)
+    .setMethodName("onMyMessage"));
 ```
 
 ## 相关链接
